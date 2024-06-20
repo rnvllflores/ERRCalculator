@@ -12,7 +12,7 @@ setup:
 	conda install -c conda-forge gdal -y
 	pip install pip-tools
 	pip-sync requirements.txt
-	pre-commit install --allow-missing-config
+	pre-commit install
 
 
 requirements:

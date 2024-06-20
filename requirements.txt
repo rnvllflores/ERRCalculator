@@ -82,6 +82,8 @@ contourpy==1.2.1
     # via matplotlib
 cycler==0.12.1
     # via matplotlib
+db-dtypes==1.2.0
+    # via pandas-gbq
 debugpy==1.8.1
     # via ipykernel
 decorator==5.1.1
@@ -120,11 +122,13 @@ geopandas==0.14.4
     #   geowrangler
 geowrangler==0.3.0
     # via -r requirements.in
-google-api-core==2.19.0
+google-api-core[grpc]==2.19.0
     # via
     #   google-api-python-client
+    #   google-cloud-bigquery
     #   google-cloud-core
     #   google-cloud-storage
+    #   pandas-gbq
 google-api-python-client==2.134.0
     # via earthengine-api
 google-auth==2.30.0
@@ -133,14 +137,26 @@ google-auth==2.30.0
     #   google-api-core
     #   google-api-python-client
     #   google-auth-httplib2
+    #   google-auth-oauthlib
+    #   google-cloud-bigquery
     #   google-cloud-core
     #   google-cloud-storage
+    #   pandas-gbq
+    #   pydata-google-auth
 google-auth-httplib2==0.2.0
     # via
     #   earthengine-api
     #   google-api-python-client
+google-auth-oauthlib==1.2.0
+    # via
+    #   pandas-gbq
+    #   pydata-google-auth
+google-cloud-bigquery==3.24.0
+    # via pandas-gbq
 google-cloud-core==2.4.1
-    # via google-cloud-storage
+    # via
+    #   google-cloud-bigquery
+    #   google-cloud-storage
 google-cloud-storage==2.17.0
     # via earthengine-api
 google-crc32c==1.5.0
@@ -148,8 +164,18 @@ google-crc32c==1.5.0
     #   google-cloud-storage
     #   google-resumable-media
 google-resumable-media==2.7.1
-    # via google-cloud-storage
+    # via
+    #   google-cloud-bigquery
+    #   google-cloud-storage
 googleapis-common-protos==1.63.1
+    # via
+    #   google-api-core
+    #   grpcio-status
+grpcio==1.64.1
+    # via
+    #   google-api-core
+    #   grpcio-status
+grpcio-status==1.62.2
     # via google-api-core
 h11==0.14.0
     # via httpcore
@@ -280,12 +306,14 @@ numpy==2.0.0
     # via
     #   -r requirements.in
     #   contourpy
+    #   db-dtypes
     #   folium
     #   geopandas
     #   geowrangler
     #   mapclassify
     #   matplotlib
     #   pandas
+    #   pandas-gbq
     #   pyarrow
     #   rasterio
     #   rasterstats
@@ -293,26 +321,35 @@ numpy==2.0.0
     #   scipy
     #   shapely
     #   snuggs
+oauthlib==3.2.2
+    # via requests-oauthlib
 overrides==7.7.0
     # via jupyter-server
 packaging==24.1
     # via
     #   black
+    #   db-dtypes
     #   fastcore
     #   geopandas
+    #   google-cloud-bigquery
     #   ipykernel
     #   jupyter-server
     #   jupyterlab
     #   jupyterlab-server
     #   matplotlib
     #   nbconvert
+    #   pandas-gbq
     #   pytest
 pandas==2.2.2
     # via
     #   -r requirements.in
+    #   db-dtypes
     #   geopandas
     #   geowrangler
     #   mapclassify
+    #   pandas-gbq
+pandas-gbq==0.23.1
+    # via -r requirements.in
 pandocfilters==1.5.1
     # via nbconvert
 parso==0.8.4
@@ -342,6 +379,7 @@ protobuf==4.25.3
     # via
     #   google-api-core
     #   googleapis-common-protos
+    #   grpcio-status
     #   proto-plus
 psutil==6.0.0
     # via ipykernel
@@ -352,7 +390,10 @@ ptyprocess==0.7.0
 pure-eval==0.2.2
     # via stack-data
 pyarrow==16.1.0
-    # via geowrangler
+    # via
+    #   db-dtypes
+    #   geowrangler
+    #   pandas-gbq
 pyasn1==0.6.0
     # via
     #   pyasn1-modules
@@ -365,6 +406,8 @@ pydantic==2.7.4
     # via morecantile
 pydantic-core==2.18.4
     # via pydantic
+pydata-google-auth==1.8.2
+    # via pandas-gbq
 pygments==2.18.0
     # via
     #   ipython
@@ -383,6 +426,7 @@ pytest==8.2.2
 python-dateutil==2.9.0.post0
     # via
     #   arrow
+    #   google-cloud-bigquery
     #   jupyter-client
     #   matplotlib
     #   pandas
@@ -418,8 +462,12 @@ requests==2.32.3
     #   folium
     #   geowrangler
     #   google-api-core
+    #   google-cloud-bigquery
     #   google-cloud-storage
     #   jupyterlab-server
+    #   requests-oauthlib
+requests-oauthlib==2.0.0
+    # via google-auth-oauthlib
 rfc3339-validator==0.1.4
     # via
     #   jsonschema
