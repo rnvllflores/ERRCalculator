@@ -1,4 +1,5 @@
 # Import standard library modules
+import os
 from pathlib import Path
 
 # The ROOT_DIR should represent the absolute path of the project root folder
@@ -10,3 +11,11 @@ PROJ_CRS = "EPSG:4326"
 
 # GCS ID and BQ Dataset IDs
 GCP_PROJ_ID = "clearwind"  # Replace with project ID
+
+# data subdirectories
+CSV_DATA_DIR = DATA_DIR / "csv"
+
+for data_dir in [
+    CSV_DATA_DIR,
+]:
+    data_dir.mkdir(exist_ok=True)
