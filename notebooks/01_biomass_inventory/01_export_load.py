@@ -191,22 +191,8 @@ dead_trees_c1.info(), dead_trees_c1.head(2)
 # ## Export data and upload to BQ
 
 # %%
+dead_trees_c1.to_csv(CARBON_POOLS_OUTDIR / "dead_trees_class1.csv", index=False)
+
+# %%
 # Upload to BQ
 pandas_gbq.to_gbq(dead_trees_c1, f"{DATASET_ID}.dead_trees_c1", project_id=GCP_PROJ_ID)
-
-# %% [markdown]
-# trees above ground
-# trees below ground (roots)
-# saplings
-# non-tree and litter
-# stumps
-# lying deadwood
-# standing deadwood
-# dead trees
-#
-#
-# aggregation
-# by subplot
-# by plot
-# by strata
-#
