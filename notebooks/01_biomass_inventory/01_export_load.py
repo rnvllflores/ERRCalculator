@@ -17,23 +17,43 @@
 
 # %% [markdown]
 # # Imports and Set-up
+#
+# import os
 
 # %%
+# Standard Imports
 import sys
 import urllib.request
 
+import numpy as np
 import pandas as pd
+
+# Google Cloud Imports
+import pandas_gbq
 
 # %%
 # Util imports
 sys.path.append("../../")  # include parent directory
-from src.biomass_inventory import extract_trees
-from src.settings import DATA_DIR
+from src.biomass_inventory import (
+    extract_dead_trees_class1,
+    extract_stumps,
+    extract_trees,
+)
+from src.settings import DATA_DIR, GCP_PROJ_ID
 
 # %%
 # Variables
 URL = "https://api.ona.io/api/v1/data/763932.csv"
 FILE_RAW = DATA_DIR / "csv" / "biomass_inventory_raw.csv"
+CARBON_POOLS_OUTDIR = DATA_DIR / "csv" / "carbon_pools"
+NESTS = [2, 3, 4]
+
+# BigQuery Variables
+DATASET_ID = "biomass_inventory"
+
+# %%
+# Create output directory
+CARBON_POOLS_OUTDIR.mkdir(parents=True, exist_ok=True)
 
 # %% [markdown]
 # # Get Data from ONA
@@ -116,9 +136,77 @@ plot_info.head(2)
 # # Extract info per carbon pool
 
 # %% [markdown]
-# ## Living Trees
+# # Living Trees
 
 # %%
-extract_trees(data, [2, 3, 4])
+trees = extract_trees(data, NESTS)
 
 # %%
+trees.info(), trees.head(2)
+
+# %% [markdown]
+# ## Export data and upload to BQ
+
+# %%
+# Export to CSV
+trees.to_csv(CARBON_POOLS_OUTDIR / "trees.csv", index=False)
+
+# %%
+# Upload to BQ
+pandas_gbq.to_gbq(trees, f"{DATASET_ID}.trees", project_id=GCP_PROJ_ID)
+
+# %% [markdown]
+# # Tree Stumps
+
+# %% [markdown]
+# note (delete when addressed): removed `'biomass_per_kg_tree': [biomass_per_kg_tree],`. In the original code there was a placeholder column created, this can be added later in the process when biomass per tree is actually calculated
+
+# %%
+stumps = extract_stumps(data, NESTS)
+
+# %%
+stumps.info(), stumps.head(2)
+
+# %% [markdown]
+# ## Export data and upload to BQ
+
+# %%
+# Export to CSV
+stumps.to_csv(CARBON_POOLS_OUTDIR / "stumps.csv", index=False)
+
+# %%
+# Upload to BQ
+pandas_gbq.to_gbq(stumps, f"{DATASET_ID}.stumps", project_id=GCP_PROJ_ID)
+
+# %% [markdown]
+# # Dead Trees: Class 1
+
+# %%
+dead_trees_c1 = extract_dead_trees_class1(data, NESTS)
+
+# %%
+dead_trees_c1.info(), dead_trees_c1.head(2)
+
+# %% [markdown]
+# ## Export data and upload to BQ
+
+# %%
+# Upload to BQ
+pandas_gbq.to_gbq(dead_trees_c1, f"{DATASET_ID}.dead_trees_c1", project_id=GCP_PROJ_ID)
+
+# %% [markdown]
+# trees above ground
+# trees below ground (roots)
+# saplings
+# non-tree and litter
+# stumps
+# lying deadwood
+# standing deadwood
+# dead trees
+#
+#
+# aggregation
+# by subplot
+# by plot
+# by strata
+#
