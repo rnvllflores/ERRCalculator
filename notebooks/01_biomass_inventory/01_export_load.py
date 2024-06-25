@@ -19,6 +19,7 @@
 # # Imports and Set-up
 #
 # import os
+# import re
 
 # %%
 # Standard Imports
@@ -35,6 +36,7 @@ import pandas_gbq
 # Util imports
 sys.path.append("../../")  # include parent directory
 from src.biomass_inventory import (
+    extract_dead_trees_c3,
     extract_dead_trees_class1,
     extract_stumps,
     extract_trees,
@@ -271,137 +273,50 @@ if len(dead_trees_c2) != 0:
         dead_trees_c2, f"{DATASET_ID}.dead_trees_c2", project_id=GCP_PROJ_ID
     )
 
+# %% [markdown]
+# # Dead Trees: Class 3
+
+# %%
+dead_trees_c3 = extract_dead_trees_c3(data, NESTS)
+
+# %%
+dead_trees_c3.info(), dead_trees_c3.head(2)
 
 # %% [markdown]
-# # Dead Trees: Tall
-
-
-# %%
-def extract_dead_trees_for_nests(data, nest_numbers):
-    all_dead_trees = pd.DataFrame()
-
-    for nest_number in nest_numbers:
-        # Define column name patterns
-        species_name_columns = [
-            col
-            for col in data.columns
-            if f"tree_data_nest{nest_number}/*t_species_name_nest{nest_number}" in col
-        ]
-        family_name_columns = [
-            col
-            for col in data.columns
-            if f"tree_data_nest{nest_number}/*t_family_name_nest{nest_number}" in col
-        ]
-        livedead_columns = [
-            col
-            for col in data.columns
-            if f"tree_data_nest{nest_number}/*t_livedead_nest{nest_number}" in col
-        ]
-        class_columns = [
-            col
-            for col in data.columns
-            if f"tree_data_nest{nest_number}/*t_deadcl_nest{nest_number}" in col
-        ]
-        subclass_columns = [
-            col
-            for col in data.columns
-            if f"tree_data_nest{nest_number}/*cl2_tallshort/t_deadcl2_nest{nest_number}_tallshort"
-            in col
-        ]
-        tall_columns = [
-            col
-            for col in data.columns
-            if f"tree_data_nest{nest_number}/*cl2_tall/t_dead_nest{nest_number}_/*"
-            in col
-        ]
-
-        for i in range(len(data)):
-            for j, species_name_col in enumerate(species_name_columns):
-                if (
-                    not pd.isna(data.loc[i, livedead_columns[j]])
-                    and not pd.isna(data.loc[i, class_columns[j]])
-                    and not pd.isna(data.loc[i, subclass_columns[j]])
-                ):
-                    if (
-                        data.loc[i, livedead_columns[j]] == 2
-                        and data.loc[i, class_columns[j]] == 2
-                        and data.loc[i, subclass_columns[j]] == 2
-                    ):
-                        # Extract relevant data
-                        unique_ID = data.loc[i, "unique_ID"]
-                        species_name = data.loc[i, species_name_columns[j]]
-                        family_name = data.loc[i, family_name_columns[j]]
-
-                        # Extract relevant tall columns dynamically
-                        relevant_tall_columns = [
-                            col
-                            for col in tall_columns
-                            if f"tree_data_nest{nest_number}.tree_data_nest{nest_number}_rep.{j}.."
-                            in col
-                        ]
-                        tall_data = data.loc[i, relevant_tall_columns]
-
-                        # Rename the columns to ensure consistency (convert to lowercase)
-                        tall_data.columns = [
-                            col.lower().replace(f".*t_dead_nest{nest_number}_", "")
-                            for col in tall_data.columns
-                        ]
-
-                        # Combine all data into a single row
-                        new_row = pd.DataFrame(
-                            {
-                                "unique_ID": [unique_ID],
-                                "nest": [nest_number],
-                                "species_name": [species_name],
-                                "family_name": [family_name],
-                                **tall_data.to_dict(orient="list"),
-                                "class": [2],
-                            }
-                        )
-
-                        # Append the new row to the result data frame
-                        all_dead_trees = pd.concat(
-                            [all_dead_trees, new_row], ignore_index=True
-                        )
-
-    return all_dead_trees
-
+# ## Export data and upload to BQ
 
 # %%
-nest_number = 3
+# Export CSV
+if len(dead_trees_c3) != 0:
+    dead_trees_c3.to_csv(CARBON_POOLS_OUTDIR / "dead_trees_class3.csv", index=False)
 
 # %%
-species_name_columns = [
-    col
-    for col in data.columns
-    if f"tree_data_nest{nest_number}/*t_species_name_nest{nest_number}" in col
-]
-family_name_columns = [
-    col
-    for col in data.columns
-    if f"tree_data_nest{nest_number}/*t_family_name_nest{nest_number}" in col
-]
-livedead_columns = [
-    col
-    for col in data.columns
-    if f"tree_data_nest{nest_number}/*t_livedead_nest{nest_number}" in col
-]
-class_columns = [
-    col
-    for col in data.columns
-    if f"tree_data_nest{nest_number}/*t_deadcl_nest{nest_number}" in col
-]
-subclass_columns = [
-    col
-    for col in data.columns
-    if f"tree_data_nest{nest_number}/*cl2_tallshort/t_deadcl2_nest{nest_number}_tallshort"
-    in col
-]
-tall_columns = [
-    col
-    for col in data.columns
-    if f"tree_data_nest{nest_number}/*cl2_tall/t_dead_nest{nest_number}_/*" in col
-]
+# Upload to BQ
+if len(dead_trees_c3) != 0:
+    pandas_gbq.to_gbq(
+        dead_trees_c3, f"{DATASET_ID}.dead_trees_c3", project_id=GCP_PROJ_ID
+    )
+
+# %% [markdown]
+# # Lying Deadwood: Hollow
 
 # %%
-species_name_columns
+ldw_hollow = extract_ldw_with_hollow(data)
+
+# %%
+ldw_hollow.info(), ldw_hollow.head(2)
+
+# %% [markdown]
+# ## Export data and upload to BQ
+
+# %%
+# Export CSV
+if len(ldw_hollow) != 0:
+    ldw_hollow.to_csv(CARBON_POOLS_OUTDIR / "lying_deadwood_hollow.csv", index=False)
+
+# %%
+# Upload to BQ
+if len(ldw_hollow) != 0:
+    pandas_gbq.to_gbq(
+        ldw_hollow, f"{DATASET_ID}.lying_deadwood_hollow", project_id=GCP_PROJ_ID
+    )
