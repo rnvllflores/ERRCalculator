@@ -228,7 +228,17 @@ def extract_dead_trees_class1(data, nest_numbers):
     return all_dead_trees
 
 
-def extract_dead_trees_class2(data, nest_numbers):
+def extract_dead_trees_class2s(data, nest_numbers):
+    """
+    Extracts information about dead trees of class 2 from the given data.
+
+    Args:
+        data (pd.DataFrame): The input data containing tree information.
+        nest_numbers (list): A list of nest numbers to extract dead trees from.
+
+    Returns:
+        pd.DataFrame: A DataFrame containing information about the extracted dead trees.
+    """
     all_dead_trees = pd.DataFrame()
 
     for nest_number in nest_numbers:
@@ -301,7 +311,17 @@ def extract_dead_trees_class2(data, nest_numbers):
     return all_dead_trees
 
 
-def extract_dead_trees_class3(data, nest_numbers):
+def extract_dead_trees_class2t(data, nest_numbers):
+    """
+    Extracts data for dead trees of class 3 from the given data frame based on the provided nest numbers.
+
+    Args:
+        data (pandas.DataFrame): The data frame containing the tree data.
+        nest_numbers (list): A list of nest numbers to filter the data.
+
+    Returns:
+        pandas.DataFrame: A data frame containing the extracted data for dead trees of class 3.
+    """
     all_dead_trees = pd.DataFrame()
 
     for nest_number in nest_numbers:

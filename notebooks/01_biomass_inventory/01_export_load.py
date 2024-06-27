@@ -218,7 +218,7 @@ pandas_gbq.to_gbq(trees, f"{DATASET_ID}.trees", project_id=GCP_PROJ_ID)
 # # Tree Stumps
 
 # %% [markdown]
-# note (delete when addressed): removed `'biomass_per_kg_tree': [biomass_per_kg_tree],`. In the original code there was a placeholder column created, this can be added later in the process when biomass per tree is actually calculated
+# [delete when fixed] Note: removed `'biomass_per_kg_tree': [biomass_per_kg_tree],`. In the original code there was a placeholder column created, this can be added later in the process when biomass per tree is actually calculated
 
 # %%
 stumps = extract_stumps(data, NESTS)
@@ -263,51 +263,56 @@ dead_trees_c1.to_csv(CARBON_POOLS_OUTDIR / "dead_trees_class1.csv", index=False)
 pandas_gbq.to_gbq(dead_trees_c1, f"{DATASET_ID}.dead_trees_c1", project_id=GCP_PROJ_ID)
 
 # %% [markdown]
-# # Dead Trees: Class 2
+# # Dead Trees: Class 2 - short
 
 # %%
-dead_trees_c2 = extract_dead_trees_class2(data, NESTS)
+dead_trees_c2s = extract_dead_trees_class2(data, NESTS)
 
 # %%
-dead_trees_c2.info(), dead_trees_c2.head(2)
+dead_trees_c2s.info(), dead_trees_c2s.head(2)
 
 # %% [markdown]
 # ## Export data and upload to BQ
 
 # %%
 # Export CSV
-if len(dead_trees_c2) != 0:
-    dead_trees_c2.to_csv(CARBON_POOLS_OUTDIR / "dead_trees_class2.csv", index=False)
+if len(dead_trees_c2s) != 0:
+    dead_trees_c2s.to_csv(CARBON_POOLS_OUTDIR / "dead_trees_class2.csv", index=False)
 
 # %%
 # Upload to BQ
-if len(dead_trees_c2) != 0:
+if len(dead_trees_c2s) != 0:
     pandas_gbq.to_gbq(
-        dead_trees_c2, f"{DATASET_ID}.dead_trees_c2", project_id=GCP_PROJ_ID
+        dead_trees_c2s, f"{DATASET_ID}.dead_trees_c2s", project_id=GCP_PROJ_ID
     )
 
 # %% [markdown]
-# # Dead Trees: Class 3
+# # Dead Trees: Class 2 - Tall
+
+# %% [markdown]
+# [delete when fixed] Note: This is still class 2 but tall trees. rename variables and functions accordingly
 
 # %%
-dead_trees_c3 = extract_dead_trees_c3(data, NESTS)
+dead_trees_ct2 = extract_dead_trees_c2t(data, NESTS)
 
 # %%
-dead_trees_c3.info(), dead_trees_c3.head(2)
+dead_trees_c2t.info(), dead_trees_c2t.head(2)
 
 # %% [markdown]
 # ## Export data and upload to BQ
 
 # %%
 # Export CSV
-if len(dead_trees_c3) != 0:
-    dead_trees_c3.to_csv(CARBON_POOLS_OUTDIR / "dead_trees_class3.csv", index=False)
+if len(dead_trees_c2t) != 0:
+    dead_trees_c2t.to_csv(
+        CARBON_POOLS_OUTDIR / "dead_trees_class2_tall.csv", index=False
+    )
 
 # %%
 # Upload to BQ
-if len(dead_trees_c3) != 0:
+if len(dead_trees_c2t) != 0:
     pandas_gbq.to_gbq(
-        dead_trees_c3, f"{DATASET_ID}.dead_trees_c3", project_id=GCP_PROJ_ID
+        dead_trees_c2t, f"{DATASET_ID}.dead_trees_c2t", project_id=GCP_PROJ_ID
     )
 
 # %% [markdown]
