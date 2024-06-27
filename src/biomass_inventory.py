@@ -301,7 +301,7 @@ def extract_dead_trees_class2(data, nest_numbers):
     return all_dead_trees
 
 
-def extract_dead_trees_c3(data, nest_numbers):
+def extract_dead_trees_class3(data, nest_numbers):
     all_dead_trees = pd.DataFrame()
 
     for nest_number in nest_numbers:
@@ -461,3 +461,43 @@ def extract_ldw_with_hollow(data):
                     break
 
     return pd.DataFrame(ldw_with_hollow)
+
+
+def extract_ldw_wo_hollow(data):
+    ldw_without_hollow = []
+
+    for i in range(len(data)):
+        row = data.iloc[i]
+        unique_id = row["unique_id"]
+        tree_class = row["lc_class/lc_class"]
+
+        for tr in ["tr1", "tr2"]:
+            for rep_num in range(1, 1000000):
+                hollow_go_column = f"ldw_{tr}/ldw_{tr}_data_rep[{rep_num}]/ldw_{tr}_basic_data/ldw_{tr}_hollow_go"
+
+                if hollow_go_column in row.index:
+                    hollow_go = row[hollow_go_column]
+
+                    if pd.notna(hollow_go) and hollow_go == "no":
+                        diameter = row.get(
+                            f"ldw_{tr}/ldw_{tr}_data_rep[{rep_num}]/ldw_{tr}_basic_data/ldw_{tr}_diameter",
+                            None,
+                        )
+                        density = row.get(
+                            f"ldw_{tr}/ldw_{tr}_data_rep[{rep_num}]/ldw_{tr}_basic_data/ldw_{tr}_density",
+                            None,
+                        )
+
+                        result_row = {
+                            "unique_id": unique_id,
+                            "repetition": rep_num,
+                            "type": tr,
+                            "class": tree_class,
+                            "diameter": pd.to_numeric(diameter, errors="coerce"),
+                            "density": pd.to_numeric(density, errors="coerce"),
+                        }
+                        ldw_without_hollow.append(result_row)
+                else:
+                    break
+
+    return pd.DataFrame(ldw_without_hollow)

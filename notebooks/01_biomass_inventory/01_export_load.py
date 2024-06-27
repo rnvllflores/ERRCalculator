@@ -26,6 +26,7 @@
 import sys
 import urllib.request
 
+import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
 
@@ -36,8 +37,11 @@ import pandas_gbq
 # Util imports
 sys.path.append("../../")  # include parent directory
 from src.biomass_inventory import (
-    extract_dead_trees_c3,
     extract_dead_trees_class1,
+    extract_dead_trees_class2,
+    extract_dead_trees_class3,
+    extract_ldw_with_hollow,
+    extract_ldw_wo_hollow,
     extract_stumps,
     extract_trees,
 )
@@ -196,6 +200,9 @@ trees = extract_trees(data, NESTS)
 # %%
 trees.info(), trees.head(2)
 
+# %%
+trees.describe()
+
 # %% [markdown]
 # ## Export data and upload to BQ
 
@@ -219,6 +226,9 @@ stumps = extract_stumps(data, NESTS)
 # %%
 stumps.info(), stumps.head(2)
 
+# %%
+stumps.describe()
+
 # %% [markdown]
 # ## Export data and upload to BQ
 
@@ -238,6 +248,9 @@ dead_trees_c1 = extract_dead_trees_class1(data, NESTS)
 
 # %%
 dead_trees_c1.info(), dead_trees_c1.head(2)
+
+# %%
+dead_trees_c1.describe()
 
 # %% [markdown]
 # ## Export data and upload to BQ
@@ -319,4 +332,30 @@ if len(ldw_hollow) != 0:
 if len(ldw_hollow) != 0:
     pandas_gbq.to_gbq(
         ldw_hollow, f"{DATASET_ID}.lying_deadwood_hollow", project_id=GCP_PROJ_ID
+    )
+
+# %% [markdown]
+# # Lying Deadwood without hollow
+
+# %%
+ldw_wo_hollow = extract_ldw_wo_hollow(data)
+
+# %%
+ldw_wo_hollow.info(), ldw_wo_hollow.head(2)
+
+# %% [markdown]
+# ## Export data and upload to BQ
+
+# %%
+# Export CSV
+if len(ldw_without_hollow) != 0:
+    ldw_wo_hollow.to_csv(
+        CARBON_POOLS_OUTDIR / "lying_deadwood_wo_hollow.csv", index=False
+    )
+
+# %%
+# Upload to BQ
+if len(ldw_wo_hollow) != 0:
+    pandas_gbq.to_gbq(
+        ldw_wo_hollow, f"{DATASET_ID}.lying_deadwood_wo_hollow", project_id=GCP_PROJ_ID
     )
