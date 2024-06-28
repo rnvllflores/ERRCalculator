@@ -181,11 +181,6 @@ plot_info_cols = [
     "slope/slope",
     "canopy/avg_height",
     "canopy/can_cov",
-    "sapling_data/count_saplings",
-    "ntv_data/litter_data/litter_bag_weight",
-    "ntv_data/litter_data/litter_sample_weight",
-    "ntv_data/ntv_bag_weight",
-    "ntv_data/ntv_sample_weight",
 ]
 
 # %%
@@ -225,11 +220,6 @@ plot_info_cols = {
     "slope/slope": "slope",
     "canopy/avg_height": "canopy_avg_height",
     "canopy/can_cov": "canopy_cover",
-    "sapling_data/count_saplings": "count_saplings",
-    "ntv_data/litter_data/litter_bag_weight": "litter_bag_weight",
-    "ntv_data/litter_data/litter_sample_weight": "litter_sample_weight",
-    "ntv_data/ntv_bag_weight": "ntv_bag_weight",
-    "ntv_data/ntv_sample_weight": "ntv_sample_weight",
 }
 
 # %%
@@ -344,6 +334,56 @@ if len(plot_info) != 0:
 # # Extract info per carbon pool
 
 # %% [markdown]
+# # Saplings, Non tree vegetation and litter
+
+# %%
+cols = plot_info_cols = [
+    "unique_id",
+    "sapling_data/count_saplings",
+    "ntv_data/litter_data/litter_bag_weight",
+    "ntv_data/litter_data/litter_sample_weight",
+    "ntv_data/ntv_bag_weight",
+    "ntv_data/ntv_sample_weight",
+]
+
+# %%
+# rename columns
+col_names = {
+    "sapling_data/count_saplings": "count_saplings",
+    "ntv_data/litter_data/litter_bag_weight": "litter_bag_weight",
+    "ntv_data/litter_data/litter_sample_weight": "litter_sample_weight",
+    "ntv_data/ntv_bag_weight": "ntv_bag_weight",
+    "ntv_data/ntv_sample_weight": "ntv_sample_weight",
+}
+
+# %%
+ntv = data[cols].copy()
+
+# %%
+ntv.rename(columns=col_names, inplace=True)
+
+# %%
+ntv.info(), ntv.head(2)
+
+# %% [markdown]
+# ## Export data and upload to BQ
+
+# %%
+# Export CSV
+if len(ntv) != 0:
+    ntv.to_csv(CARBON_POOLS_OUTDIR / "saplings_ntv_litter.csv", index=False)
+
+# %%
+# Upload to BQ
+if len(ntv) != 0:
+    pandas_gbq.to_gbq(
+        ntv,
+        f"{DATASET_ID}.saplings_ntv_litter",
+        project_id=GCP_PROJ_ID,
+        if_exists=IF_EXISTS,
+    )
+
+# %% [markdown]
 # # Living Trees
 
 # %%
@@ -452,9 +492,6 @@ if len(dead_trees_c2s) != 0:
 
 # %% [markdown]
 # # Dead Trees: Class 2 - Tall
-
-# %% [markdown]
-# [delete when fixed] Note: This is still class 2 but tall trees. rename variables and functions accordingly
 
 # %%
 dead_trees_c2t = extract_dead_trees_class2t(data, NESTS)
