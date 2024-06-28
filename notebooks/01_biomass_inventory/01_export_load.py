@@ -36,7 +36,7 @@ import pandas_gbq
 # %%
 # Util imports
 sys.path.append("../../")  # include parent directory
-from src.biomass_inventory import (
+from src.odk_data_parsing import (
     extract_dead_trees_class1,
     extract_dead_trees_class2s,
     extract_dead_trees_class2t,
