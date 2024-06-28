@@ -6,10 +6,6 @@ import pandas as pd
 
 # Functions used to format data retrieved from ONA
 
-# Notes
-# - Add description of carbon pool being extracted
-# - rename file to ODK data parsing and create separate script for the biomass calculation functions
-
 
 def extract_trees(data, nest_numbers):
     """
