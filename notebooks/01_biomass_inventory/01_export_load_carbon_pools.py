@@ -28,6 +28,7 @@
 # Standard Imports
 import sys
 import urllib.request
+from math import atan
 
 import matplotlib.pyplot as plt
 import numpy as np
@@ -48,25 +49,20 @@ from src.odk_data_parsing import (
     extract_stumps,
     extract_trees,
 )
-from src.settings import DATA_DIR, GCP_PROJ_ID
+from src.settings import CARBON_POOLS_OUTDIR, DATA_DIR, GCP_PROJ_ID
 
 # %%
 # Variables
 URL = "https://api.ona.io/api/v1/data/763932.csv"
 FILE_RAW = DATA_DIR / "csv" / "biomass_inventory_raw.csv"
-CARBON_POOLS_OUTDIR = DATA_DIR / "csv" / "carbon_pools"
 NESTS = [2, 3, 4]
 
 # BigQuery Variables
 DATASET_ID = "biomass_inventory"
 IF_EXISTS = "replace"
 
-# %%
-# Create output directory
-CARBON_POOLS_OUTDIR.mkdir(parents=True, exist_ok=True)
-
 # %% [markdown]
-# # Get Data from ONA
+# ## Get Data from ONA
 
 # %%
 column_types = {
@@ -311,6 +307,21 @@ plot_info.drop(
 
 # %%
 plot_info.access_reason.value_counts()
+
+# %% [markdown]
+# ## Calculate corrected plot area
+
+# %%
+# Convert slope from percentage to radians
+plot_info["slope_radians"] = plot_info["slope"].apply(lambda x: atan(x / 100))
+
+# %%
+# Calculate corrected radius based on slope (in radians)
+corrected_radius = 20 / np.cos(plot_info["slope_radians"])
+
+# %%
+# Calculate new total subplot area based on corrected radius
+plot_info["corrected_plot_area_m2"] = np.pi * corrected_radius * 20
 
 # %%
 plot_info.info(), plot_info.head(2)
