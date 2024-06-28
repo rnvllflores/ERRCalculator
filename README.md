@@ -1,6 +1,6 @@
 <div align="center">
 
-# ❗ [REPLACE ME] Site Scoring Workflow Template
+# OneBase Data Ingestion
 
 </div>
 
@@ -13,9 +13,7 @@
 
 # 📜 Description
 
-❗ [REPLACE ME]
-
-Sets up the local environment as well as outlines the standardized steps for a basic site scoring workflow. Read the repo wiki for more information
+Documents data processing and calculations as prescribed by Verra methodologies
 
 <br/>
 <br/>
