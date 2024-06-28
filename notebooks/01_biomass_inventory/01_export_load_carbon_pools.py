@@ -16,6 +16,9 @@
 # # Preprocess ODK data to organized tables
 
 # %% [markdown]
+# This script downloads the biomass inventory data collected on the ground using ODK and processes it to extract individual measurements for each carbon pool, per plot
+
+# %% [markdown]
 # # Imports and Set-up
 #
 # import os
