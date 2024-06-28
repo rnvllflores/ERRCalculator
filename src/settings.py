@@ -17,5 +17,5 @@ CSV_DATA_DIR = DATA_DIR / "csv"
 CARBON_POOLS_OUTDIR = CSV_DATA_DIR / "carbon_pools_inventory"
 CARBON_STOCK_OUTDIR = CSV_DATA_DIR / "carbon_stocks"
 
-for data_dir in [CSV_DATA_DIR, CARBON_POOLS_OUTDIR, BIOMASS_OUTDIR]:
+for data_dir in [CSV_DATA_DIR, CARBON_POOLS_OUTDIR, CARBON_STOCK_OUTDIR]:
     data_dir.mkdir(exist_ok=True)
