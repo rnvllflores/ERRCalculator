@@ -96,6 +96,12 @@ litter = vmd0003_eq1(litter, "litter_dry_biomass_kg", 0.15, 0.37)
 # %%
 litter.info(), litter.head(2)
 
+# %%
+litter.rename(columns={"carbon_stock": "litter_carbon_stock"}, inplace=True)
+
+# %%
+litter.to_csv(CARBON_STOCK_OUTDIR / "litter_carbon_stock.csv", index=False)
+
 # %% [markdown]
 # # Calculate carbon stock for non-tree vegetation
 
@@ -110,3 +116,9 @@ ntv = vmd0003_eq1(ntv, "ntv_biomass_kg", 0.15, 0.37)
 
 # %%
 ntv.info(), ntv.head(2)
+
+# %%
+ntv.rename(columns={"carbon_stock": "ntv_carbon_stock"}, inplace=True)
+
+# %%
+ntv.to_csv(CARBON_STOCK_OUTDIR / "ntv_carbon_stock.csv", index=False)
