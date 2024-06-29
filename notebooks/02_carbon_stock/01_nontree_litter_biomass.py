@@ -91,7 +91,7 @@ ntv_litter["litter_biomass_kg"] = (
 
 # %%
 litter = ntv_litter[["unique_id", "litter_biomass_kg"]].copy()
-litter = vmd0003_eq1(litter, "litter_dry_biomass_kg", 0.15, 0.37)
+litter = vmd0003_eq1(litter, "litter_biomass_kg", 0.15, 0.37)
 
 # %%
 litter.info(), litter.head(2)
@@ -99,8 +99,22 @@ litter.info(), litter.head(2)
 # %%
 litter.rename(columns={"carbon_stock": "litter_carbon_stock"}, inplace=True)
 
+# %% [markdown]
+# ## Export data and upload to BQ
+
 # %%
-litter.to_csv(CARBON_STOCK_OUTDIR / "litter_carbon_stock.csv", index=False)
+if len(litter) != 0:
+    litter.to_csv(CARBON_STOCK_OUTDIR / "litter_carbon_stock.csv", index=False)
+
+# %%
+# Upload to BQ
+if len(litter) != 0:
+    pandas_gbq.to_gbq(
+        litter,
+        f"{DATASET_ID}.litter_carbon_stock",
+        project_id=GCP_PROJ_ID,
+        if_exists=IF_EXISTS,
+    )
 
 # %% [markdown]
 # # Calculate carbon stock for non-tree vegetation
@@ -122,3 +136,13 @@ ntv.rename(columns={"carbon_stock": "ntv_carbon_stock"}, inplace=True)
 
 # %%
 ntv.to_csv(CARBON_STOCK_OUTDIR / "ntv_carbon_stock.csv", index=False)
+
+# %%
+# Upload to BQ
+if len(ntv) != 0:
+    pandas_gbq.to_gbq(
+        ntv,
+        f"{DATASET_ID}.ntv_carbon_stock",
+        project_id=GCP_PROJ_ID,
+        if_exists=IF_EXISTS,
+    )
