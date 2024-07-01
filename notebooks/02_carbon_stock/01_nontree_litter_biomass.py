@@ -42,7 +42,7 @@ NTV_LITTER_CSV = CARBON_POOLS_OUTDIR / "saplings_ntv_litter.csv"
 PLOT_INFO_CSV = CARBON_POOLS_OUTDIR / "plot_info.csv"
 
 # BigQuery Variables
-DATASET_ID = "biomass_inventory"
+DATASET_ID = "carbon_stock"
 IF_EXISTS = "replace"
 
 # %% [markdown]
@@ -54,7 +54,7 @@ if PLOT_INFO_CSV.exists():
 else:
     query = f"""
     SELECT
-        *
+        * 
     FROM {GCP_PROJ_ID}.{DATASET_ID}.plot_info"""
 
     # Read the BigQuery table into a dataframe
@@ -69,8 +69,8 @@ if NTV_LITTER_CSV.exists():
     ntv_litter = pd.read_csv(NTV_LITTER_CSV)
 else:
     query = f"""
-    SELECT
-        *
+    SELECT 
+        * 
     FROM {GCP_PROJ_ID}.{DATASET_ID}.saplings_ntv_litter"""
 
     # Read the BigQuery table into a dataframe
@@ -94,10 +94,16 @@ litter = ntv_litter[["unique_id", "litter_biomass_kg"]].copy()
 litter = vmd0003_eq1(litter, "litter_biomass_kg", 0.15, 0.37)
 
 # %%
-litter.info(), litter.head(2)
+litter.rename(
+    columns={
+        "carbon_stock": "litter_carbon_stock",
+        "dry_biomass": "litter_dry_biomass",
+    },
+    inplace=True,
+)
 
 # %%
-litter.rename(columns={"carbon_stock": "litter_carbon_stock"}, inplace=True)
+litter.info(), litter.head(2)
 
 # %% [markdown]
 # ## Export data and upload to BQ
@@ -108,12 +114,19 @@ if len(litter) != 0:
 
 # %%
 # Upload to BQ
+table_schema = [
+    {"name": "unique_id", "type": "STRING"},
+    {"name": "litter_biomass_kg", "type": "FLOAT64"},
+    {"name": "litter_dry_biomass", "type": "FLOAT64"},
+    {"name": "litter_carbon_stock", "type": "FLOAT64"},
+]
 if len(litter) != 0:
     pandas_gbq.to_gbq(
         litter,
         f"{DATASET_ID}.litter_carbon_stock",
         project_id=GCP_PROJ_ID,
         if_exists=IF_EXISTS,
+        table_schema=table_schema,
     )
 
 # %% [markdown]
