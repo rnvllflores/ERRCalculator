@@ -144,7 +144,7 @@ ntv = vmd0003_eq1(ntv, "ntv_biomass_kg", 0.15, 0.47)
 # %%
 ntv.rename(
     columns={
-        "CO2e_per_ha": "ntv_cCO2e_per_ha",
+        "CO2e_per_ha": "ntv_CO2e_per_ha",
         "dry_biomass": "ntv_dry_biomass",
     },
     inplace=True,
