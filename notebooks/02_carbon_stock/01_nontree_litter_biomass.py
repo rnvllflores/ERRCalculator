@@ -54,7 +54,7 @@ if PLOT_INFO_CSV.exists():
 else:
     query = f"""
     SELECT
-        * 
+        *
     FROM {GCP_PROJ_ID}.{DATASET_ID}.plot_info"""
 
     # Read the BigQuery table into a dataframe
@@ -69,8 +69,8 @@ if NTV_LITTER_CSV.exists():
     ntv_litter = pd.read_csv(NTV_LITTER_CSV)
 else:
     query = f"""
-    SELECT 
-        * 
+    SELECT
+        *
     FROM {GCP_PROJ_ID}.{DATASET_ID}.saplings_ntv_litter"""
 
     # Read the BigQuery table into a dataframe
@@ -139,7 +139,7 @@ ntv_litter["ntv_biomass_kg"] = (
 
 # %%
 ntv = ntv_litter[["unique_id", "ntv_biomass_kg"]].copy()
-ntv = vmd0003_eq1(ntv, "ntv_biomass_kg", 0.15, 0.37)
+ntv = vmd0003_eq1(ntv, "ntv_biomass_kg", 0.15, 0.47)
 
 # %%
 ntv.info(), ntv.head(2)
