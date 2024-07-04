@@ -1,0 +1,379 @@
+"code_family","family","scientific_name","local_name","code_species","corrected_genus","wood_density"
+999,"Unknown","Litchi chinensis","Alupag - amo",193,"Litchi",0.608901846878946
+1,"Alangiaceae","Alangium javanicum","Putian",15,"Alangium",0.608901846878946
+2,"Anacardiaceae","Koordersiodendron pinnatum","Amugis",185,"Koordersiodendron",0.623
+3,"Annonaceae","Buchanania arborescens","Balinghasai",56,"Buchanania",0.565580530764063
+4,"Apocynaceae","Parishia maingayi","Bulalog",240,"Parishia",0.592856179202742
+5,"Araliaceae","Dracontomelon dao","Dao",116,"Dracontomelon",0.422710836834734
+6,"Araucariaceae","Spondias mombin","Hogs Plum",299,"Spondias",0.454994920634921
+7,"Arecaceae","Semecarpus cuneiformis","Kamiring",274,"Semecarpus",0.551760416666667
+8,"Avicenniaceae","Dracontomelon edule","Lamio",117,"Dracontomelon",0.608901846878946
+9,"Bignoniaceae","Spondias pinnata","Libas",300,"Spondias",0.565745691358025
+10,"Bombacaceae","Semecarpus perrottetii","Ligas",275,"Semecarpus",0.608901846878946
+11,"Boraginaceae","Swintonia foxworthyi","Lumarao / Apitong
+baboi",308,"Swintonia",0.649492982017982
+12,"Burseraceae","Mangifera altissima","Pahutan",212,"Mangifera",0.518144351294328
+13,"Cannaceae","Mangifera monandra","Pahutan / Malipajo",213,"Mangifera",0.608901846878946
+14,"Casuarinaceae","Pistacia chinensis","Sangilo",249,"Pistacia",0.831586616161616
+15,"Celastraceae","Platymitra arborea","Bolon",254,"Platymitra",0.679654620181406
+16,"Chrysobalanaceae","Cananga odorata","Ilang - ilang",61,"Cananga",0.805709207431457
+17,"Combretaceae","Mitrephora lanotan","Lanutan",222,"Mitrephora",0.710842720551759
+18,"Compositae","Alstonia macrophylla","Batino",26,"Alstonia",0.607109375
+19,"Cornaceae","Alstonia scholaris var scholaris","Dita",27,"Alstonia",0.547191666666667
+20,"Datiscaceae","Wrightia pubescens subsp laniti","Lanete",346,"Wrightia",0.608901846878946
+21,"Dilleniaceae","Alyxia concatenata","Malabatino",28,"Alyxia",0.633114583333333
+22,"Dipterocarpaceae","Tabernaemontana pandacaqui","Pandakaking - gubat",317,"Tabernaemontana",0.659942819069942
+23,"Ebenaceae","Polyscias nodosa","Malapapaya",256,"Polyscias",0.711970896464647
+24,"Euphorbiaceae","Agathis philippinensis","Almaciga",3,"Agathis",0.544977248125887
+25,"Fabaceae","Saribus rotundifolius","Anahaw",376,"Saribus",0.702416608694313
+26,"Fagaceae","Oncosperma tigillarium","Anibong /
+Anibong - gubat",371,"Oncosperma",0.605454686498618
+27,"Flac tiaceae","Corypha utan","Buri",368,"Corypha",0.608901846878946
+28,"Gentianaceae","Arenga pinnata","Kaong",365,"Arenga",0.635527777777778
+29,"Guttiferae","Nypa fruticans","Nipa",370,"Nypa",0.608901846878946
+30,"Icacinaceae","Caryota cumingii","Pugahan",366,"Caryota",0.64475
+31,"Juglandaceae","Pinanga insignis","Sarawag",375,"Pinanga",0.487918282828283
+32,"Labiatae","Caryota urens","Takipan",367,"Caryota",0.608901846878946
+33,"Lauraceae","Livistona saribus","Tarau",369,"Livistona",0.564417570308376
+34,"Lecythidaceae","Avicennia officinalis","Api - api",45,"Avicennia",0.640188716471928
+35,"Leeaceae","Spathodea campanulata","African Tulip",298,"Spathodea",0.608901846878946
+36,"Leguminosae","Radermachera pinnata","Banai - banai",266,"Radermachera",0.848593137254902
+37,"Linaceae","Durio zibethinus","Durian",121,"Durio",0.84775
+38,"Lythraceae","Bombax ceiba","Malabulak",49,"Bombax",0.692623015873016
+39,"Magnoliaceae","Cordia subcordata","Balu",80,"Cordia",0.441512037037037
+40,"Malvaceae","Garuga floribunda","Bogo",151,"Garuga",0.48873153604215
+41,"Meliaceae","Canarium hirsutum","Dulit",63,"Canarium",0.594346097689909
+42,"Moraceae","Canarium asperum","Pagsahingin - bulog",62,"Canarium",0.566972652968407
+43,"Myristicaceae","Canarium ovatum","Pili",65,"Canarium",0.507734054341305
+44,"Myrsinaceae","Canarium luzonicum","Piling - liitan",64,"Canarium",0.608901846878946
+45,"Myrtaceae","Canna indica","Tikas - pula",66,"Canna",0.765578145976224
+46,"Nyctaginaceae","Casuarina equisetifolia","Agoho",69,"Casuarina",0.573625
+47,"Olacaceae","Gymnostoma rumphianum","Agoho del Monte",162,"Gymnostoma",0.742428289473684
+48,"Oleaceae","Lophopetalum javanum","Abuab",200,"Lophopetalum",0.756826492437604
+49,"Pandanaceae","Licania splendens","Amayan",192,"Licania",0.331
+50,"Pinaceae","Maranthes corymbosa","Luisin",215,"Maranthes",0.442890793509122
+51,"Pittosporaceae","Atuna racemosa","Tabon - tabon",44,"Atuna",0.622875
+52,"Poaceae","Terminalia citrina","Binggas",322,"Terminalia",0.608901846878946
+53,"Podocarpaceae","Terminalia pellucida","Dalinsi",327,"Terminalia",0.501752023915627
+54,"Rhamnaceae","Terminalia microcarpa","Kalumpit",325,"Terminalia",0.742069687257187
+55,"Rhizophoraceae","Lumnitzera racemosa","Kulasi",203,"Lumnitzera",0.684399148957104
+56,"Rizophoraceae","Terminalia copelandi","Lanipaul",323,"Terminalia",0.608901846878946
+57,"Rosaceae","Terminalia calamansanay","Malakalumpit",320,"Terminalia",0.648092857142857
+58,"Rubiaceae","Terminalia nitens","Sakat",326,"Terminalia",0.637445334781665
+59,"Rutaceae","Lumnitzera littorea","Tabau",202,"Lumnitzera",0.710658456724681
+60,"Sapindaceae","Terminalia catappa","Talisay",321,"Terminalia",0.734062972279183
+61,"Sapindaceae","Terminalia foetidissima","Talisay - gubat",324,"Terminalia",0.734062972279183
+62,"Sapotaceae","Glebionis coronaria","Tungkao",152,"Glebionis",0.714868811809291
+63,"Simaroubaceae","Mastixia pentandra subsp philippinensis","Apanit",216,"Mastixia",0.433019603174603
+64,"Solanaceae","Octomeles sumatrana","Binuang",232,"Octomeles",0.537788095238095
+65,"Sonneratiaceae","Dillenia philippinensis","Katmon",94,"Dillenia",0.608901846878946
+66,"Staphyleaceae","Dillenia reifferscheidia","Katmon - kalabaw",95,"Dillenia",0.394
+67,"Sterculiaceae","Dillenia luzoniensis","Malakatmon",93,"Dillenia",0.608901846878946
+68,"Symplocaceae","Vatica umbonata","  Narig",341,"Vatica",0.533541666666667
+69,"Thymelaeaceae","Anisoptera curtisii","Afu",31,"Anisoptera",0.529428571428571
+70,"Tiliaceae","Shorea almon","Almon",276,"Shorea",0.608901846878946
+71,"Ulmaceae","Dipterocarpus grandiflorus","Apitong",109,"Dipterocarpus",0.662276666666667
+72,"Urticaceae","Shorea malaanonan","Bagtikan",285,"Shorea",0.329392846835704
+73,"Xanthophyllaceae","Hopea basilanica","Basilan - Yakal",170,"Hopea",0.608901846878946
+NA,"","Dipterocarpus eurhynchus","Basilan Apitong",107,"Dipterocarpus",0.608901846878946
+NA,"","Dipterocarpus kunstleri","Broad - winged Apitong",113,"Dipterocarpus",0.608901846878946
+NA,"","Anisoptera aurea","Dagang",29,"Anisoptera",0.608901846878946
+NA,"","Hopea foxworthyi","Dalingdingan",173,"Hopea",0.608901846878946
+NA,"","Hopea philippinensis","Gisok - Gisok",176,"Hopea",0.608901846878946
+NA,"","Shorea guiso","Guijo",283,"Shorea",0.608901846878946
+NA,"","Dipterocarpus validus","Hagakhak",115,"Dipterocarpus",0.608901846878946
+NA,"","Dipterocarpus alatus","Hairy - eafed Apitong",105,"Dipterocarpus",0.608901846878946
+NA,"","Dipterocarpus hasseltii","Hasselt Panau",110,"Dipterocarpus",0.608901846878946
+NA,"","Dipterocarpus sutalpinus","Highland Panau",111,"Dipterocarpus",0.608901846878946
+NA,"","Shorea hopeifolia","Kalunti",284,"Shorea",0.608901846878946
+NA,"","Dipterocarpus caudatus","Leaf - Tailed Panau",106,"Dipterocarpus",0.608901846878946
+NA,"","Shorea polita","Malaanonan",291,"Shorea",0.608901846878946
+NA,"","Shorea plagata","Malaguijo",290,"Shorea",0.608901846878946
+NA,"","Dipterocarpus kerrii","Malapanau",112,"Dipterocarpus",0.608901846878946
+NA,"","Shorea seminis","Malayakal",293,"Shorea",0.608901846878946
+NA,"","Hopea acuminata","Manggachapui",169,"Hopea",0.608901846878946
+NA,"","Shorea assamica var philippinensis","Manggasinoro",277,"Shorea",0.608901846878946
+NA,"","Shorea palosapis","Mayapis",289,"Shorea",0.608901846878946
+NA,"","Hopea brachyptera","Mindanao Narek",171,"Hopea",0.608901846878946
+NA,"","Vatica odorata","Mindanao Narig",338,"Vatica",0.608901846878946
+NA,"","Anisoptera costata","Mindanao Palosapis",30,"Anisoptera",0.608901846878946
+NA,"","Hopea cagayanensis","Narek",172,"Hopea",0.608901846878946
+NA,"","Vatica mangachapoi","Narig",337,"Vatica",0.608901846878946
+NA,"","Anisoptera thurifera","Palosapis",32,"Anisoptera",0.608901846878946
+NA,"","Dipterocarpus gracilis","Panau",108,"Dipterocarpus",0.608901846878946
+NA,"","Shorea negrosensis","Red auan",287,"Shorea",0.608901846878946
+NA,"","Dipterocarpus orbicularis","Round - eafed Apitong",114,"Dipterocarpus",0.608901846878946
+NA,"","Shorea polysperma","Tangile",292,"Shorea",0.608901846878946
+NA,"","Vatica rassak","Tawi - tawi Narig",340,"Vatica",0.608901846878946
+NA,"","Vatica pachyphylla","Thick - leafed Narig",339,"Vatica",0.608901846878946
+NA,"","Shorea ovata","Tiaong",288,"Shorea",0.608901846878946
+NA,"","Shorea contorta","White auan",280,"Shorea",0.608901846878946
+NA,"","Vatica whitfordii","Whitford Narig",342,"Vatica",0.608901846878946
+NA,"","Shorea astylosa","Yakal",278,"Shorea",0.608901846878946
+NA,"","Shorea gisok","Yakal - Gisok",282,"Shorea",0.608901846878946
+NA,"","Hopea malibato","Yakal - Kaliot",174,"Hopea",0.608901846878946
+NA,"","Shorea ciliata","Yakal - Mabolo",279,"Shorea",0.608901846878946
+NA,"","Hopea mindanensis","Yakal - Magasusu",175,"Hopea",0.608901846878946
+NA,"","Shorea malibato","Yakal - Malibato",286,"Shorea",0.608901846878946
+NA,"","Hopea plagata","Yakal - Saplungan",177,"Hopea",0.608901846878946
+NA,"","Shorea falciferoides","Yakal - Yamban",281,"Shorea",0.608901846878946
+NA,"","Diospyros pyrrhocarpa","Anang",102,"Diospyros",0.608901846878946
+NA,"","Diospyros mindanaensis","Ata - ata",100,"Diospyros",0.608901846878946
+NA,"","Diospyros pilosanthera","Bolong - eta",101,"Diospyros",0.608901846878946
+NA,"","Diospyros vera","Ebony",103,"Diospyros",0.608901846878946
+NA,"","Diospyros discolor","Kamagong",99,"Diospyros",0.608901846878946
+NA,"","Melanolepis multiglandulosa","Alim",217,"Melanolepis",0.608901846878946
+NA,"","Flueggea flexuosa","Anislag",145,"Flueggea",0.608901846878946
+NA,"","Mallotus cumingii","Apauang",210,"Mallotus",0.608901846878946
+NA,"","Glochidion triandrum","Bagna",155,"Glochidion",0.608901846878946
+NA,"","Reutealis trisperma","Baguilumbang",267,"Reutealis",0.608901846878946
+NA,"","Balakata luzonica","Balakat - gubat",47,"Balakata",0.608901846878946
+NA,"","Homalanthus populneus","Balanti",167,"Homalanthus",0.608901846878946
+NA,"","Drypetes longifolia","Balikbikan",118,"Drypetes",0.608901846878946
+NA,"","Mallotus philippensis","Banato",211,"Mallotus",0.608901846878946
+NA,"","Macaranga caudatifolia","Daha",206,"Macaranga",0.608901846878946
+NA,"","Endospermum peltatum","Gubas",125,"Endospermum",0.608901846878946
+NA,"","Macaranga bicolor","Hamindang",205,"Macaranga",0.608901846878946
+NA,"","Trigonostemon longipes","Katap",332,"Trigonostemon",0.608901846878946
+NA,"","Dimorphocalyx luzoniensis","Kulispakatan",98,"Dimorphocalyx",0.608901846878946
+NA,"","Aleurites moluccana","Lumbang",21,"Aleurites",0.608901846878946
+NA,"","Hancea penangensis","Malamala",163,"Hancea",0.608901846878946
+NA,"","Breynia vitisidaea","Matang - hipon",51,"Breynia",0.608901846878946
+NA,"","Hevea brasiliensis","Para Rubber",166,"Hevea",0.608901846878946
+NA,"","Macaranga grandifolia","Takip - asin",207,"Macaranga",0.608901846878946
+NA,"","Drypetes maquilingensis","Tinaang - pantai",119,"Drypetes",0.608901846878946
+NA,"","Bischofia javanica","Tuai",48,"Bischofia",0.608901846878946
+NA,"","Adenanthera intermedia","Tanglin",1,"Adenanthera",0.608901846878946
+NA,"","Afzelia rhomboidea","Tindalo",2,"Afzelia",0.608901846878946
+NA,"","Lithocarpus ovalis","Manggasiriki",195,"Lithocarpus",0.608901846878946
+NA,"","Lithocarpus caudatifolius","Ulayan Oak",194,"Lithocarpus",0.608901846878946
+NA,"","Homalium foetidum","Arangga",168,"Homalium",0.608901846878946
+NA,"","Hydnocarpus heterophylla","Balik",179,"Hydnocarpus",0.608901846878946
+NA,"","Trichadenia philippinensis","Malapinggan",331,"Trichadenia",0.608901846878946
+NA,"","Pangium edule","Pangil",238,"Pangium",0.608901846878946
+NA,"","Fagraea racemosa","Balat - buaya",132,"Fagraea",0.608901846878946
+NA,"","Fagraea fragrans","Urung",131,"Fagraea",0.608901846878946
+NA,"","Calophyllum blancoi","Bitanghol",57,"Calophyllum",0.608901846878946
+NA,"","Calophyllum inophyllum","Bitaog - Palomaria",58,"Calophyllum",0.608901846878946
+NA,"","Garcinia venulosa","Gatasan",150,"Garcinia",0.608901846878946
+NA,"","Garcinia ituman","Haras / Ituman",148,"Garcinia",0.608901846878946
+NA,"","Garcinia rubra","Kamandiis",149,"Garcinia",0.608901846878946
+NA,"","Calophyllum pentapetalum var cumingii","Malabitaog",59,"Calophyllum",0.608901846878946
+NA,"","Cratoxylum sumatranum","Paguringon",82,"Cratoxylum",0.608901846878946
+NA,"","Calophyllum whitfordii","Pamitaogen",60,"Calophyllum",0.608901846878946
+NA,"","Cratoxylum formosum","Salinggogon",81,"Cratoxylum",0.608901846878946
+NA,"","Garcinia dulcis","Taklang - anak",147,"Garcinia",0.608901846878946
+NA,"","Gomphandra luzoniensis","Mabunot",157,"Gomphandra",0.608901846878946
+NA,"","Gonocaryum calleryanum","Taingang - baboi",158,"Gonocaryum",0.608901846878946
+NA,"","Engelhardtia rigida","Buntan",126,"Engelhardia",0.608901846878946
+NA,"","Teijsmanniodendron ahernianum","Dangula Sasalit",319,"Teijsmanniodendron",0.608901846878946
+NA,"","Vitex turczaninowii","Lingo - lingo",344,"Vitex",0.608901846878946
+NA,"","Premna cumingiana","Maguilik",258,"Premna",0.608901846878946
+NA,"","Vitex parviflora","Molave",343,"Vitex",0.608901846878946
+NA,"","Tectona grandis","Teak",318,"Tectona",0.608901846878946
+NA,"","Gmelina arborea","Yemane",156,"Gmelina",0.608901846878946
+NA,"","Cryptocarya ampla","Bagarilao",83,"Cryptocarya",0.608901846878946
+NA,"","Litsea philippinensis","Bakan",199,"Litsea",0.608901846878946
+NA,"","Cryptocarya edanoii","Balangua",84,"Cryptocarya",0.608901846878946
+NA,"","Litsea leytensis","Batikuling",197,"Litsea",0.608901846878946
+NA,"","Alseodaphne philippinensis","Boga",25,"Alseodaphne",0.608901846878946
+NA,"","Phoebe sterculioides","Kaburo",244,"Phoebe",0.608901846878946
+NA,"","Cinnamomum mercadoi","Kalingag / Cinamomon",77,"Cinnamomum",0.608901846878946
+NA,"","Cinnamomum philippinense","Kulilisiau",78,"Cinnamomum",0.608901846878946
+NA,"","Alseodaphne malabonga","Malabunga",24,"Alseodaphne",0.608901846878946
+NA,"","Dehaasia cairocan","Malakadios",90,"Dehaasia",0.608901846878946
+NA,"","Litsea perrottetii","Marang",198,"Litsea",0.608901846878946
+NA,"","Dehaasia incrassata","Margapali",91,"Dehaasia",0.608901846878946
+NA,"","Litsea euphlebia","Matang - usa",196,"Litsea",0.608901846878946
+NA,"","Neolitsea vidalii","Puso - puso",228,"Neolitsea",0.608901846878946
+NA,"","Planchonia spectabilis","Lamog",253,"Planchonia",0.608901846878946
+NA,"","Petersianthus quadrialatus","Toog",243,"Petersianthus",0.608901846878946
+NA,"","Leea guineensis","Kaliantan",190,"Leea",0.608901846878946
+NA,"","Albizia acle","Akle",16,"Albizia",0.608901846878946
+NA,"","Albizia procera","Akleng - parang",18,"Albizia",0.608901846878946
+NA,"","Archidendron scutiferum","Anagap",36,"Archidendron",0.608901846878946
+NA,"","Ormosia calavensis","Bahai",233,"Ormosia",0.608901846878946
+NA,"","Cynometra ramiflora","Balitbitan",87,"Cynometra",0.608901846878946
+NA,"","Aceodendron celebicum","Banuyo",345,"Aceodendron",0.608901846878946
+NA,"","Kingiodendron alternifolium","Batete",182,"Kingiodendron",0.608901846878946
+NA,"","Schizolobium parahyba","Brazilian fire Tree",273,"Schizolobium",0.608901846878946
+NA,"","Cassia fistula","Cana - Fistula",68,"Cassia",0.608901846878946
+NA,"","Erythrina variegata","Dapdap",129,"Erythrina",0.608901846878946
+NA,"","Enterolobium cyclocarpum","Earpod",127,"Enterolobium",0.608901846878946
+NA,"","Intsia bijuga","Ipil",181,"Intsia",0.608901846878946
+NA,"","Leucaena leucocephala","Ipil - ipil",191,"Leucaena",0.608901846878946
+NA,"","Hymenaea courbaril","Jatoba",180,"Hymenaea",0.608901846878946
+NA,"","Gliricidia sepium","Kakawete",154,"Gliricidia",0.608901846878946
+NA,"","Sympetalandra densiflora","Kamatog",309,"Sympetalandra",0.608901846878946
+NA,"","Sindora inermis","Kayugalo",294,"Sindora",0.608901846878946
+NA,"","Parkia timoriana","Kupang",241,"Parkia",0.608901846878946
+NA,"","Koompassia excelsa","Manggis",184,"Koompassia",0.608901846878946
+NA,"","Falcataria moluccana","Moluccan sau",133,"Falcataria",0.608901846878946
+NA,"","Pterocarpus indicus","Narra",262,"Pterocarpus",0.608901846878946
+NA,"","Albizia saman","Rain Tree Acacia",19,"Albizia",0.608901846878946
+NA,"","Erythrina subumbrans","Rarang",128,"Erythrina",0.608901846878946
+NA,"","Albizia saponaria","Salingkugi",20,"Albizia",0.608901846878946
+NA,"","Sindora supa","Supa",295,"Sindora",0.608901846878946
+NA,"","Archidendron clypearia subsp clypearia","Tiagkot",35,"Archidendron",0.608901846878946
+NA,"","Gleditsia fera","Tiri",153,"Gleditsia",0.608901846878946
+NA,"","Pterocarpus cumingii","Tubling - kahoi",261,"Pterocarpus",0.608901846878946
+NA,"","Albizia philippinensis","Unik",17,"Albizia",0.608901846878946
+NA,"","Ctenolophon parvifolius","Sudiang",85,"Ctenolophon",0.608901846878946
+NA,"","Lagerstroemia speciosa","Banaba",187,"Lagerstroemia",0.608901846878946
+NA,"","Lagerstroemia piriformis","Batitinan",186,"Lagerstroemia",0.608901846878946
+NA,"","Magnolia philippinensis","Sandit",209,"Magnolia",0.608901846878946
+NA,"","Thespesia campylosiphon"," 's anutan",328,"Thespesia",0.608901846878946
+NA,"","Melia azedarach","Bagalunga",218,"Melia",0.608901846878946
+NA,"","Chisocheton cumingianus","Balukang",75,"Chisocheton",0.608901846878946
+NA,"","Aglaia rimosa","Bayanti",13,"Aglaia",0.608901846878946
+NA,"","Aglaia leptantha","Gisihan",10,"Aglaia",0.608901846878946
+NA,"","Aglaia iloilo","Ilo - ilo",9,"Aglaia",0.608901846878946
+NA,"","Toona calantas","Kalantas",329,"Toona",0.608901846878946
+NA,"","Aphanamixis polystachya","Kangko",33,"Aphanamixis",0.608901846878946
+NA,"","Aglaia argentea","Kansulud",4,"Aglaia",0.608901846878946
+NA,"","Aglaia cucullata","Kato",5,"Aglaia",0.608901846878946
+NA,"","Chisocheton pentandrus","Katong - matsin",76,"Chisocheton",0.608901846878946
+NA,"","Dysoxylum oppositifolium","Kayatau",124,"Dysoxylum",0.608901846878946
+NA,"","Aglaia luzoniensis","Kuling - manok",11,"Aglaia",0.608901846878946
+NA,"","Lansium domesticum","Lanzones",188,"Lansium",0.608901846878946
+NA,"","Swietenia mahagoni","Mahogany",307,"Swietenia",0.608901846878946
+NA,"","Aglaia elliptica","Malalumbaga",8,"Aglaia",0.608901846878946
+NA,"","Aglaia edulis","Malasaging",6,"Aglaia",0.608901846878946
+NA,"","Sandoricum vidalii","Malasantol",271,"Sandoricum",0.608901846878946
+NA,"","Azadirachta excelsa","Maranggo",46,"Azadirachta",0.608901846878946
+NA,"","Aglaia elaeagnoidea","Matamata",7,"Aglaia",0.608901846878946
+NA,"","Dysoxylum alliaceum","Miao",122,"Dysoxylum",0.608901846878946
+NA,"","Xylocarpus moluccensis","Piagau",351,"Xylocarpus",0.608901846878946
+NA,"","Lansium parasiticum","Pulahan",189,"Lansium",0.608901846878946
+NA,"","Aphanamixis spp","Salakin",34,"Aphanamixis",0.608901846878946
+NA,"","Sandoricum koetjape","Santol",270,"Sandoricum",0.608901846878946
+NA,"","Cedrela odorata","Spanish Cedar",70,"Cedrela",0.608901846878946
+NA,"","Xylocarpus granatum","Tabigi",350,"Xylocarpus",0.608901846878946
+NA,"","Dysoxylum cumingianum","Tara - tara",123,"Dysoxylum",0.608901846878946
+NA,"","Aglaia pachyphylla","Tukang - kalau",12,"Aglaia",0.608901846878946
+NA,"","Artocarpus blancoi","Antipolo",39,"Artocarpus",0.608901846878946
+NA,"","Artocarpus ovatus","Anubing",42,"Artocarpus",0.608901846878946
+NA,"","Ficus ampelas","Apias",134,"Ficus",0.608901846878946
+NA,"","Ficus balete","Balete",135,"Ficus",0.608901846878946
+NA,"","Ficus botryocarpa","Basikong",136,"Ficus",0.608901846878946
+NA,"","Ficus minahassae","Hagimit",139,"Ficus",0.608901846878946
+NA,"","Ficus septica","Hawili",142,"Ficus",0.608901846878946
+NA,"","Broussonetia luzonica","Himbabao",52,"Broussonetia",0.608901846878946
+NA,"","Ficus ulmifolia","Is - is",143,"Ficus",0.608901846878946
+NA,"","Streblus asper","Kalios",305,"Streblus",0.608901846878946
+NA,"","Artocarpus rubrovenius","Kalulot",43,"Artocarpus",0.608901846878946
+NA,"","Ficus magnoliifolia","Kanapai",138,"Ficus",0.608901846878946
+NA,"","Artocarpus nitidus","Kubi",41,"Artocarpus",0.608901846878946
+NA,"","Parartocarpus venenosa","Malanangka",239,"Parartocarpus",0.608901846878946
+NA,"","Ficus congesta","Malatibig",137,"Ficus",0.608901846878946
+NA,"","Artocarpus heterophyllus","Nangka",40,"Artocarpus",0.608901846878946
+NA,"","Ficus pseudopalma","Niog - niyogan",141,"Ficus",0.608901846878946
+NA,"","Ficus variegata","Tanguisang - bayawak",144,"Ficus",0.608901846878946
+NA,"","Ficus nota","Tibig",140,"Ficus",0.608901846878946
+NA,"","Myristica philippinensis","Duguan",226,"Myristica",0.608901846878946
+NA,"","Gymnacranthera farquhariana var paniculata","Malakapa",161,"Gymnacranthera",0.608901846878946
+NA,"","Myristica glomerata","Tambalau",225,"Myristica",0.608901846878946
+NA,"","Myristica elliptica","Tanghas",224,"Myristica",0.608901846878946
+NA,"","Horsfieldia costulata","Yabnob",178,"Horsfieldia",0.608901846878946
+NA,"","Ardisia paniculata","Aunasin",38,"Ardisia",0.608901846878946
+NA,"","Ardisia elliptica","Tagpo",37,"Ardisia",0.608901846878946
+NA,"","Eucalyptus deglupta","Bagras",130,"Eucalyptus",0.608901846878946
+NA,"","Syzygium acuminatissimum","Binoloan",311,"Syzygium",0.608901846878946
+NA,"","Syzygium nitidum","Makaasim",316,"Syzygium",0.608901846878946
+NA,"","Tristaniopsis decorticata","Malabayabas",333,"Tristaniopsis",0.608901846878946
+NA,"","Syzygium claviflorum","Malaruhat /
+Panglomboyen",314,"Syzygium",0.608901846878946
+NA,"","Xanthostemon verdugonianus","Mankono",349,"Xanthostemon",0.608901846878946
+NA,"","Xanthostemon bracteatus","Mapilig",348,"Xanthostemon",0.608901846878946
+NA,"","Syzygium costulatum","Paitan",315,"Syzygium",0.608901846878946
+NA,"","Syzygium brevistylum","Saguimsim",313,"Syzygium",0.608901846878946
+NA,"","Tristaniopsis littoralis","Taba",334,"Tristaniopsis",0.608901846878946
+NA,"","Syzygium aqueum","Tambis / Malatambis",312,"Syzygium",0.608901846878946
+NA,"","Tristaniopsis micrantha","Tiga",335,"Tristaniopsis",0.608901846878946
+NA,"","Pisonia umbellifera","Anuling",248,"Pisonia",0.608901846878946
+NA,"","Strombosia philippinensis","Tamayuan",306,"Strombosia",0.608901846878946
+NA,"","Chionanthus ramiflorus","Karaksan",74,"Chionanthus",0.608901846878946
+NA,"","Fraxinus griffithii","Philippine Ash",146,"Fraxinus",0.608901846878946
+NA,"","Pandanus spp","Pandan",373,"Pandanus",0.608901846878946
+NA,"","Pandanus exaltatus","Pandan - layugan",372,"Pandanus",0.608901846878946
+NA,"","Pandanus tectorius","Pandan Mottled",374,"Pandanus",0.608901846878946
+NA,"","Pinus kesiya","Benguet Pine",246,"Pinus",0.608901846878946
+NA,"","Pinus caribaea","Caribbean Pine",245,"Pinus",0.608901846878946
+NA,"","Pinus merkusii","Mindoro Pine",247,"Pinus",0.608901846878946
+NA,"","Pittosporum pentandrum","Mamalis",250,"Pittosporum",0.608901846878946
+NA,"","Schizostachyum lima","Anos",362,"Schizostachyum",0.608901846878946
+NA,"","Dendrocalamus merrillianus","Bayog",357,"Dendrocalamus",0.608901846878946
+NA,"","Schizostachyum diffusum","Bikal",361,"Schizostachyum",0.608901846878946
+NA,"","Dinochloa dielsiana","Bikal - baboi",358,"Dinochloa",0.608901846878946
+NA,"","Dinochloa luconiae","Bocaue",359,"Dinochloa",0.608901846878946
+NA,"","Gigantochloa levis","Bolo",360,"Gigantochloa",0.608901846878946
+NA,"","Schizostachyum lumampao","Buho",363,"Schizostachyum",0.608901846878946
+NA,"","Dendrocalamus asper","Giant Bambo0",356,"Dendrocalamus",0.608901846878946
+NA,"","Bambusa vulgaris","Kawayan Kiling",355,"Bambusa",0.608901846878946
+NA,"","Bambusa blumeana","Kawayan Tinik",354,"Bambusa",0.608901846878946
+NA,"","Dacrycarpus imbricatus","Igem",88,"Dacrycarpus",0.608901846878946
+NA,"","Dacrydium beccarii","Lokinai",89,"Dacrydium",0.608901846878946
+NA,"","Podocarpus rumphii","Malakauayan",255,"Podocarpus",0.608901846878946
+NA,"","Ziziphus talanae","Balakat",353,"Ziziphus",0.608901846878946
+NA,"","Ziziphus hutchinsonii","Lumuluas",352,"Ziziphus",0.608901846878946
+NA,"","Alphitonia philippinensis","Tulo",23,"Alphitonia",0.608901846878946
+NA,"","Carallia brachiata","Bakauan - gubat",67,"Carallia",0.608901846878946
+NA,"","Bruguiera gymnorhiza","Busain",53,"Bruguiera",0.608901846878946
+NA,"","Bruguiera parviflora","Langarai",54,"Bruguiera",0.608901846878946
+NA,"","Bruguiera sexangula","Pototan",55,"Bruguiera",0.608901846878946
+NA,"","Ceriops tagal","Tangal",73,"Ceriops",0.608901846878946
+NA,"","Rhizophora apiculata","Bakauan",268,"Rhizophora",0.608901846878946
+NA,"","Prunus grisea","Lago",259,"Prunus",0.608901846878946
+NA,"","Pertusadina multifolia","Adina",242,"Pertusadina",0.608901846878946
+NA,"","Nauclea orientalis","Bangkal",227,"Nauclea",0.608901846878946
+NA,"","Breonia chinensis","Bangkal , Kaatoan",50,"Breonia",0.608901846878946
+NA,"","Neonauclea formicaria","Bangkal , Southern / Hambabalud",230,"Neonauclea",0.608901846878946
+NA,"","Neonauclea calycina","Kalamansanai",229,"Neonauclea",0.608901846878946
+NA,"","Rosenbergiodendron longiflorum","Kalumala",269,"Rosenbergiodendron",0.608901846878946
+NA,"","Psychotria luzoniensis","Katagpo",260,"Psychotria",0.608901846878946
+NA,"","Ludekia bernardoi","Ludek",201,"Ludekia",0.608901846878946
+NA,"","Neonauclea media","Usak",231,"Neonauclea",0.608901846878946
+NA,"","Melicope confusa","Bugawak",219,"Melicope",0.608901846878946
+NA,"","Murraya paniculata","Kamuning",223,"Murraya",0.608901846878946
+NA,"","Lunasia amara","Lunas",204,"Lunasia",0.608901846878946
+NA,"","Melicope triphylla","Matang - araw",220,"Melicope",0.608901846878946
+NA,"","Guioa koelreuteria","Alahan",160,"Guioa",0.608901846878946
+NA,"","Dimocarpus longan subsp malesianus","Alupag",97,"Dimocarpus",0.608901846878946
+NA,"","Dimocarpus fumatus","Bulala Wild Rambutan",96,"Dimocarpus",0.608901846878946
+NA,"","Cubilia cubili","Kubili",86,"Cubilia",0.608901846878946
+NA,"","Sapindus saponaria","Kusibang",272,"Sapindus",0.608901846878946
+NA,"","Allophylus cobbe","Malugai",22,"Allophylus",0.608901846878946
+NA,"","Mimusops elengi","Bansalangin",221,"Mimusops",0.608901846878946
+NA,"","Madhuca betis","Betis",208,"Madhuca",0.608901846878946
+NA,"","Planchonella duclitan","Duklitan",251,"Planchonella",0.608901846878946
+NA,"","Manilkara fasciculata","Duyok - duyok",214,"Manilkara",0.608901846878946
+NA,"","Palaquium philippense","Malak - malak",237,"Palaquium",0.608901846878946
+NA,"","Planchonella obovata","Mangkas",252,"Planchonella",0.608901846878946
+NA,"","Palaquium luzoniense","Nato",235,"Palaquium",0.608901846878946
+NA,"","Palaquium obovatum","Red Nato",236,"Palaquium",0.608901846878946
+NA,"","Palaquium foxworthyi","Tagatoi",234,"Palaquium",0.608901846878946
+NA,"","Pouteria macrantha","White Nato",257,"Pouteria",0.608901846878946
+NA,"","Ailanthus triphysa","Malakamias",14,"Ailanthus",0.608901846878946
+NA,"","Solanum verbascifolium","Malatabako",296,"Solanum",0.608901846878946
+NA,"","Duabanga moluccana","Loktob",120,"Duabanga",0.608901846878946
+NA,"","Sonneratia alba","Pagatpat",297,"Sonneratia",0.608901846878946
+NA,"","Turpinia sphaerocarpa","Laloi",336,"Turpinia",0.608901846878946
+NA,"","Pterospermum diversifolium","Bayok",264,"Pterospermum",0.608901846878946
+NA,"","Heritiera littoralis","Dungon - late",165,"Heritiera",0.608901846878946
+NA,"","Sterculia foetida","Kalumpang",302,"Sterculia",0.608901846878946
+NA,"","Pterospermum obliquum","Kulatingan",265,"Pterospermum",0.608901846878946
+NA,"","Heritiera javanica","Lumbayao",164,"Heritiera",0.608901846878946
+NA,"","Sterculia oblongata","Malabuho",303,"Sterculia",0.608901846878946
+NA,"","Sterculia cordata","Mt Tapinag",301,"Sterculia",0.608901846878946
+NA,"","Sterculia rubiginosa","Sinaligan",304,"Sterculia",0.608901846878946
+NA,"","Pterocymbium tinctorium","Taluto",263,"Pterocymbium",0.608901846878946
+NA,"","Kleinhovia hospita","Tan - ag",183,"Kleinhovia",0.608901846878946
+NA,"","Symplocos cochinchinensis","Agosip",310,"Symplocos",0.608901846878946
+NA,"","Gonystylus macrophyllus","Lanutan - baguio",159,"Gonystylus",0.608901846878946
+NA,"","Colona serratifolia","Anilao",79,"Colona",0.608901846878946
+NA,"","Diplodiscus paniculatus","Balobo",104,"Diplodiscus",0.608901846878946
+NA,"","Trema orientalis","Anabiong",330,"Trema",0.608901846878946
+NA,"","Celtis luzonica","Magabuyo",71,"Celtis",0.608901846878946
+NA,"","Celtis philippensis","Malaikmo",72,"Celtis",0.608901846878946
+NA,"","Dendrocnide meyeniana","Lipang - kalabaw",92,"Dendrocnide",0.608901846878946
+NA,"","Xanthophyllum flavescens","Bokbok",347,"Xanthophyllum",0.608901846878946
