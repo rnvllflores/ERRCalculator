@@ -2,41 +2,6 @@ import numpy as np
 import pandas as pd
 
 
-def vmd0003_eq1(
-    data: pd.DataFrame,
-    col_name: str,
-    water_content: float,
-    carbon_fraction: float = 0.37,
-):
-    """
-    Calculate the carbon stock from forest litter and non-tree vegetation based on VCS module VMD0003 - equation 1.
-
-
-    Reference here:
-    VCS Module: https://verra.org/wp-content/uploads/2023/11/VMD0003-Estimation-of-Carbon-Stocks-in-the-Litter-Pool-CP-L-v1.1.pdf
-    Water content: Assumed to be 85% based on...
-    Carbon fraction: Assumed to be 0.37 and 0.47 for ;litter and non-tree vegetation respectively based on...
-
-    Parameters:
-    data (DataFrame): The input data containing the plot information and biomass in kilograms.
-    col_name (str): The name of the column for the biomass in kilograms.
-    water_content (float): The water content of the biomass. Used as multiplier to remove water weight
-    carbon_fraction (float): Carbon fraction of dry matter, default is 0.37 based on based on VMD0003.
-
-    Returns:
-    DataFrame: The input data with additional columns for dry biomass and carbon stock.
-    """
-    # remove water content
-    data.loc[:, "dry_biomass"] = data[col_name] * water_content
-
-    # calculate carbon stock
-    data.loc[:, "carbon_stock"] = (
-        (10 / 0.25) * data["dry_biomass"] * carbon_fraction * 44 / 12
-    )
-
-    return data
-
-
 # height model
 def calculate_tree_height(df, dbh_column):
     """
@@ -140,12 +105,93 @@ def vmd0001_eq1(
     """
 
     if not is_sapling:
-        df["aboveground_carbon_stock"] = df["aboveground_biomass"] * carbon_fraction
+        df["aboveground_carbon_tonnes"] = df["aboveground_biomass"] * carbon_fraction
 
     else:
-        df["aboveground_carbon_stock"] = (
+        df["aboveground_carbon_tonnes"] = (
             df[sapling_cnt] * avg_weight * wc
         ) * carbon_fraction
-        df["aboveground_carbon_stock"] = df["aboveground_carbon_stock"].fillna(0)
+        df["aboveground_carbon_tonnes"] = df["aboveground_carbon_tonnes"].fillna(0)
 
     return df
+
+
+def vmd0001_eq2(
+    df: pd.DataFrame,
+    biomass_col: str = "aboveground_carbon_tonnes",
+    area_col: str = "corrected_sapling_area_m2",
+) -> pd.DataFrame:
+    """
+    Calculate CO2e per hectare based on biomass and area.
+
+    Args:
+        df (pd.DataFrame): The input DataFrame containing biomass and area columns.
+        biomass_col (str, optional): The column name of the biomass data. Defaults to "aboveground_carbon_tonnes".
+        area_col (str, optional): The column name of the area data. Defaults to "corrected_sapling_area_m2".
+
+    Returns:
+        pd.DataFrame: The input DataFrame with an additional column "CO2e_per_ha" representing CO2e per hectare.
+    """
+    df["CO2e_per_ha"] = ((df[biomass_col] / df[area_col]) * 10) * 44 / 12
+
+    return df
+
+
+def vmd0001_eq5(
+    df: pd.DataFrame,
+    carbon_stock_col: str = "aboveground_carbon_tonnes",
+    eco_zone: str = "tropical_rainforest",
+):
+    if eco_zone == "tropical_rainforest" or eco_zone == "subtropical_humid":
+        df["below_ground_carbon_tonnes"] = np.where(
+            df[carbon_stock_col] < 125,
+            df[carbon_stock_col] * 0.20,
+            df[carbon_stock_col] * 0.24,
+        )
+    elif eco_zone == "subtropical_dry":
+        df["below_ground_carbon_tonnes"] = np.where(
+            df[carbon_stock_col] < 20,
+            df[carbon_stock_col] * 0.56,
+            df[carbon_stock_col] * 0.28,
+        )
+    else:
+        raise ValueError(
+            "Invalid eco_zone value. Please choose a valid eco_zone or add root-to-shoot ratio for the desired ecological zone."
+        )
+
+    return df
+
+
+def vmd0003_eq1(
+    data: pd.DataFrame,
+    col_name: str,
+    water_content: float,
+    carbon_fraction: float = 0.37,
+):
+    """
+    Calculate the carbon stock from forest litter and non-tree vegetation based on VCS module VMD0003 - equation 1.
+
+
+    Reference here:
+    VCS Module: https://verra.org/wp-content/uploads/2023/11/VMD0003-Estimation-of-Carbon-Stocks-in-the-Litter-Pool-CP-L-v1.1.pdf
+    Water content: Assumed to be 85% based on...
+    Carbon fraction: Assumed to be 0.37 and 0.47 for ;litter and non-tree vegetation respectively based on...
+
+    Parameters:
+    data (DataFrame): The input data containing the plot information and biomass in kilograms.
+    col_name (str): The name of the column for the biomass in kilograms.
+    water_content (float): The water content of the biomass. Used as multiplier to remove water weight
+    carbon_fraction (float): Carbon fraction of dry matter, default is 0.37 based on based on VMD0003.
+
+    Returns:
+    DataFrame: The input data with additional columns for dry biomass and carbon stock.
+    """
+    # remove water content
+    data.loc[:, "dry_biomass"] = data[col_name] * water_content
+
+    # calculate carbon stock
+    data.loc[:, "CO2e_per_ha"] = (
+        (10 / 0.25) * data["dry_biomass"] * carbon_fraction * 44 / 12
+    )
+
+    return data
