@@ -1,32 +1,137 @@
-[tool.black]
+[build-system]
+requires = ["setuptools >= 69.2.0"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "idn-data-mart"
+# version = "2024.4.8"
+description = "Preprocess common geospatial datasets for indonesia."
+# authors = [ {name = "My Name", email = "myemail@example.com"}, ]
+requires-python = ">= 3.11"
+readme = "README.md"
+dependencies = [
+  "beautifulsoup4",
+  "cdsapi",
+  "dbt-core",
+  "dbt-bigquery",
+  "dbt-postgres",
+  "dbt-duckdb",
+  "duckdb",
+  "earthengine-api",
+  "fiona",
+  "folium",
+  "fsspec",
+  "gcsfs",
+  "gdal",
+  "geopandas",
+  "geowrangler>=0.1.1",
+  "google-cloud-bigquery[all]",
+  "google-cloud-secret-manager",
+  "ipyleaflet",
+  "ipywidgets>=7.0",
+  "jupyterlab",
+  "jupytext",
+  "keplergl",
+  "localtileserver",
+  "loguru",
+  "mapbox",
+  "multiprocess",
+  "nbdime",
+  "nbstripout",
+  "networkx",
+  "numpy",
+  "pandarallel",
+  "pandas",
+  "pandas-gbq",
+  "polars",
+  "pre-commit",
+  "pyarrow>=11.0.0",
+  "pygeos",
+  "pytest",
+  "requests",
+  "rapidfuzz",
+  "rasterio",
+  "rasterstats",
+  "rioxarray",
+  "rtree",
+  "ruff",
+  "mapclassify",
+  "matplotlib",
+  "rapidfuzz",
+  "seaborn",
+  "shapely",
+  "tqdm",
+  "xarray",
+]
+
+[project.urls]
+Repository = "https://github.com/thinkingmachines/geo-retail-data-mart"
+Wiki = "https://github.com/thinkingmachines/geo-retail-data-mart/wiki"
+
+[tool.ruff]
+# Exclude a variety of commonly ignored directories.
+exclude = [
+    ".bzr",
+    ".direnv",
+    ".eggs",
+    ".git",
+    ".git-rewrite",
+    ".hg",
+    ".ipynb_checkpoints",
+    ".mypy_cache",
+    ".nox",
+    ".pants.d",
+    ".pyenv",
+    ".pytest_cache",
+    ".pytype",
+    ".ruff_cache",
+    ".svn",
+    ".tox",
+    ".venv",
+    ".vscode",
+    "__pypackages__",
+    "_build",
+    "buck-out",
+    "build",
+    "dist",
+    "node_modules",
+    "site-packages",
+    "venv",
+]
+
+# Same as Black.
 line-length = 88
-include = '\.pyi?$'
-exclude = '''
-(
-  /(
-      \.eggs         # exclude a few common directories in the
-    | \.git          # root of the project
-    | \.hg
-    | \.mypy_cache
-    | \.tox
-    | \.venv
-    | _build
-    | buck-out
-    | build
-    | dist
-  )/
-  | foo.py           # also separately exclude a file named foo.py in
-                     # the root of the project
-)
-'''
+indent-width = 4
 
-[tool.isort]
-# for compatibility with black
-# https://black.readthedocs.io/en/stable/the_black_code_style.html?highlight=isort#how-black-wraps-lines
+# Assume Python 3.11
+target-version = "py311"
 
-multi_line_output = 3
-include_trailing_comma = "True"
-force_grid_wrap = 0
-use_parentheses = "True"
-ensure_newline_before_comments = "True"
-line_length = 88
+# Discover Jupyter Notebooks
+extend-include = ["*.ipynb"]
+
+[tool.ruff.format]
+# Like Black, use double quotes for strings.
+quote-style = "double"
+
+# Like Black, indent with spaces, rather than tabs.
+indent-style = "space"
+
+# Like Black, respect magic trailing commas.
+skip-magic-trailing-comma = false
+
+# Like Black, automatically detect the appropriate line ending.
+line-ending = "auto"
+
+# Enable auto-formatting of code examples in docstrings. Markdown,
+# reStructuredText code/literal blocks and doctests are all supported.
+#
+# This is currently disabled by default, but it is planned for this
+# to be opt-out in the future.
+docstring-code-format = false
+
+# Set the line length limit used when formatting code snippets in
+# docstrings.
+#
+# This only has an effect when the `docstring-code-format` setting is
+# enabled.
+docstring-code-line-length = "dynamic"
