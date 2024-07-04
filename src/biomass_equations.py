@@ -3,7 +3,10 @@ import pandas as pd
 
 
 def vmd0003_eq1(
-    data: pd.DataFrame, col_name: str, water_content: float, carbon_fraction: float
+    data: pd.DataFrame,
+    col_name: str,
+    water_content: float,
+    carbon_fraction: float = 0.37,
 ):
     """
     Calculate the carbon stock from forest litter and non-tree vegetation based on VCS module VMD0003 - equation 1.
@@ -18,7 +21,7 @@ def vmd0003_eq1(
     data (DataFrame): The input data containing the plot information and biomass in kilograms.
     col_name (str): The name of the column for the biomass in kilograms.
     water_content (float): The water content of the biomass. Used as multiplier to remove water weight
-    carbon_fraction (float): The carbon fraction.
+    carbon_fraction (float): Carbon fraction of dry matter, default is 0.37 based on based on VMD0003.
 
     Returns:
     DataFrame: The input data with additional columns for dry biomass and carbon stock.
@@ -69,12 +72,15 @@ def allometric_tropical_tree(df, wooddensity_col, dbh_col, height_col):
     dbh_col (str): The column name in the dataframe that represents diameter at breast height in cm.
     height_col (str): The column name in the dataframe that represents tree height in m.
 
+    Formula:
+    The aboveground biomass is calculated using the following equation:
+    aboveground_biomass = 10 * (0.0673 * ((wood density * height * dbh** 2) ** 0.976)). The factor 10 is used to convert the biomass from kg to metric tons.
+
     Returns:
-    pandas.DataFrame: The input dataframe with an additional column 'aboveground_biomass' representing the calculated aboveground biomass.
+    pandas.DataFrame: The input dataframe with an additional column 'aboveground_biomass' representing the calculated aboveground biomass in tons.
     """
     df["aboveground_biomass"] = 10 * (
-        0.0673
-        * ((trees[wooddensity_col] * trees[height_col] * trees[dbh_col] ** 2) ** 0.976)
+        0.0673 * ((df[wooddensity_col] * df[height_col] * df[dbh_col] ** 2) ** 0.976)
     )
 
     return df
@@ -101,25 +107,45 @@ def allometric_peatland_tree(df, dbh_col):
 
     Formula:
     The aboveground biomass is calculated using the following equation:
-    aboveground_biomass = 10 * (21.297 - (6.53 * trees[dbh_col]) + (0.74 * trees[dbh_col]**2))
+    aboveground_biomass = 10 * (21.297 - (6.53 * trees[dbh_col]) + (0.74 * trees[dbh_col]**2)) The factor 10 is used to convert the biomass from kg to metric tons.
+
     """
     df["aboveground_biomass"] = 10 * (
-        21.297 - (6.53 * trees[dbh_col]) + (0.74 * trees[dbh_col] ** 2)
+        21.297 - (6.53 * df[dbh_col]) + (0.74 * df[dbh_col] ** 2)
     )
     return df
 
 
-def vmd0001_eq1(df: pd.DataFrame, carbon_fraction: float):
+def vmd0001_eq1(
+    df: pd.DataFrame,
+    carbon_fraction: float = 0.47,
+    is_sapling: bool = False,
+    sapling_cnt: str = "count_saplings",
+    wc: float = 0.25,
+    avg_weight: float = 184,
+):
     """
     Calculate the carbon stock based on the aboveground biomass and carbon fraction.
 
     Parameters:
-    df (pd.DataFrame): The input DataFrame containing the aboveground biomass.
-    carbon_fraction (float): The carbon fraction used to convert aboveground biomass to carbon stock.
+    - df (pd.DataFrame): The input DataFrame containing the aboveground biomass.
+    - carbon_fraction (float, optional): The carbon fraction. Default value is 0.47.
+    - is_sapling (bool, optional): Flag indicating if the calculation is for saplings. Default value is False.
+    - sapling_cnt (str, optional): The column name in the DataFrame representing the count of saplings. Default value is 'count_saplings'.
+    - wc (float, optional): The wood carbon content. Default value is 0.25.
+    - avg_weight (float, optional): The average weight of the saplings. Default value is 184.
 
     Returns:
-    DataFrame: The input data with additional columns for carbon stock.
+    - DataFrame: The input data with additional columns for carbon stock.
     """
 
-    df["aboveground_carbon_stock"] = df["aboveground_biomass"] * carbon_fraction
+    if not is_sapling:
+        df["aboveground_carbon_stock"] = df["aboveground_biomass"] * carbon_fraction
+
+    else:
+        df["aboveground_carbon_stock"] = (
+            df[sapling_cnt] * avg_weight * wc
+        ) * carbon_fraction
+        df["aboveground_carbon_stock"] = df["aboveground_carbon_stock"].fillna(0)
+
     return df

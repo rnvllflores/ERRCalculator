@@ -33,7 +33,12 @@ import pandas_gbq
 # %%
 # Util imports
 sys.path.append("../../")  # include parent directory
-from src.biomass_equations import calculate_tree_height
+from src.biomass_equations import (
+    allometric_peatland_tree,
+    allometric_tropical_tree,
+    calculate_tree_height,
+    vmd0001_eq1,
+)
 from src.settings import (
     CARBON_POOLS_OUTDIR,
     CARBON_STOCK_OUTDIR,
@@ -150,7 +155,7 @@ plot_strata = pd.read_csv(PC_PLOT_LOOKUP_CSV)
 plot_strata.info()
 
 # %% [markdown]
-# # Calculate above ground biomass
+# # Calculate tree biomass
 
 # %% [markdown]
 # ## Remove outliers
@@ -169,8 +174,6 @@ elif OUTLIER_REMOVAL == "eq_150":
 
 # %% [markdown]
 # ## Add species using lookup table
-#
-# Wood density in this table was generated using [BIOMASS](https://www.rdocumentation.org/packages/BIOMASS/versions/2.1.11) library from R
 
 # %%
 species_trees = trees.merge(species, on="code_species", how="left")
@@ -204,6 +207,8 @@ trees.to_csv(CARBON_POOLS_OUTDIR / "trees_with_names.csv", index=False)
 
 # %% [markdown]
 # ## Get genus and wood density using BIOMASS R library
+#
+# Wood density was generated using [BIOMASS](https://www.rdocumentation.org/packages/BIOMASS/versions/2.1.11) library from R. For further information,
 
 # %% [markdown]
 # [To do]: insert running r script to get wood density and genus using R
@@ -212,7 +217,7 @@ trees.to_csv(CARBON_POOLS_OUTDIR / "trees_with_names.csv", index=False)
 trees = pd.read_csv(CARBON_POOLS_OUTDIR / "trees_with_wood_density.csv")
 
 # %%
-trees
+trees.head(2)
 
 # %% [markdown]
 # ## Estimate tree height
@@ -228,13 +233,13 @@ trees.head(2)
 #
 
 # %%
-trees = trees.merge(plot_strata, on="unique_id", how="left")
+trees = trees.merge(plot_strata[["unique_id", "Strata"]], on="unique_id", how="left")
 
 # %%
 trees.head(2)
 
 # %% [markdown]
-# ## Calculate biomass and carbon stock
+# ## Calculate biomass and carbon stock for tree AGB
 
 # %%
 tropical_trees = trees.loc[trees["Strata"].isin([1, 2, 3])].copy()
@@ -256,3 +261,53 @@ trees = vmd0001_eq1(trees, 0.47)
 
 # %%
 trees.head(2)
+
+
+# %% [markdown]
+# ## Calculate below ground biomass
+
+
+# %%
+def vmd0001_eq5(
+    df: pd.DataFrame,
+    carbon_stock_col: str = "aboveground_carbon_stock",
+    eco_zone: str = "tropical_rainforest",
+):
+    if eco_zone == "tropical_rainforest" or eco_zone == "subtropical_humid":
+        df["below_ground_carbon_stock"] = np.where(
+            df[carbon_stock_col] < 125,
+            df[carbon_stock_col] * 0.20,
+            df[carbon_stock_col] * 0.24,
+        )
+    elif eco_zone == "subtropical_dry":
+        df["below_ground_carbon_stock"] = np.where(
+            df[carbon_stock_col] < 20,
+            df[carbon_stock_col] * 0.56,
+            df[carbon_stock_col] * 0.28,
+        )
+    else:
+        raise ValueError(
+            "Invalid eco_zone value. Please choose a valid eco_zone or add root-to-shoot ratio for the desired ecological zone."
+        )
+
+    return df
+
+
+# %%
+trees = vmd0001_eq5(trees)
+
+# %% [markdown]
+# # Calculate sapling biomass
+
+# %%
+saplings = vmd0001_eq1(saplings, is_sapling=True)
+
+# %%
+# Calculate corrected radius for sapling nest based on slope (in radians)
+corrected_radius = 2 / np.cos(plot_info["slope_radians"])
+
+# %%
+# Calculate new total subplot area based on corrected radius
+plot_info["corrected_sapling_area_m2"] = np.pi * corrected_radius * 2
+
+# %%
