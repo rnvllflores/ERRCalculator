@@ -26,7 +26,6 @@ import sys
 
 import numpy as np
 import pandas as pd
-
 # Google Cloud Imports
 import pandas_gbq
 
@@ -34,7 +33,8 @@ import pandas_gbq
 # Util imports
 sys.path.append("../../")  # include parent directory
 from src.biomass_equations import vmd0003_eq1
-from src.settings import CARBON_POOLS_OUTDIR, CARBON_STOCK_OUTDIR, DATA_DIR, GCP_PROJ_ID
+from src.settings import (CARBON_POOLS_OUTDIR, CARBON_STOCK_OUTDIR, DATA_DIR,
+                          GCP_PROJ_ID)
 
 # %%
 # Variables
@@ -96,7 +96,7 @@ litter = vmd0003_eq1(litter, "litter_biomass_kg", 0.15, 0.37)
 # %%
 litter.rename(
     columns={
-        "carbon_stock": "litter_carbon_stock",
+        "CO2e_per_ha": "litter_CO2e_per_ha",
         "dry_biomass": "litter_dry_biomass",
     },
     inplace=True,
@@ -142,10 +142,16 @@ ntv = ntv_litter[["unique_id", "ntv_biomass_kg"]].copy()
 ntv = vmd0003_eq1(ntv, "ntv_biomass_kg", 0.15, 0.47)
 
 # %%
-ntv.info(), ntv.head(2)
+ntv.rename(
+    columns={
+        "CO2e_per_ha": "ntv_cCO2e_per_ha",
+        "dry_biomass": "ntv_dry_biomass",
+    },
+    inplace=True,
+)
 
 # %%
-ntv.rename(columns={"carbon_stock": "ntv_carbon_stock"}, inplace=True)
+ntv.info(), ntv.head(2)
 
 # %%
 ntv.to_csv(CARBON_STOCK_OUTDIR / "ntv_carbon_stock.csv", index=False)
