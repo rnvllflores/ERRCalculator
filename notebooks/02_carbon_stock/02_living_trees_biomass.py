@@ -26,34 +26,27 @@ import sys
 
 import numpy as np
 import pandas as pd
-
 # Google Cloud Imports
 import pandas_gbq
 
 # %%
 # Util imports
 sys.path.append("../../")  # include parent directory
-from src.biomass_equations import (
-    allometric_peatland_tree,
-    allometric_tropical_tree,
-    calculate_tree_height,
-    vmd0001_eq1,
-)
-from src.settings import (
-    CARBON_POOLS_OUTDIR,
-    CARBON_STOCK_OUTDIR,
-    DATA_DIR,
-    GCP_PROJ_ID,
-    PC_PLOT_LOOKUP_CSV,
-    SPECIES_LOOKUP_CSV,
-)
+from src.biomass_equations import (allometric_peatland_tree,
+                                   allometric_tropical_tree,
+                                   calculate_tree_height, vmd0001_eq1,
+                                   vmd0001_eq5)
+from src.settings import (CARBON_POOLS_OUTDIR, CARBON_STOCK_OUTDIR, DATA_DIR,
+                          GCP_PROJ_ID, PC_PLOT_LOOKUP_CSV, SPECIES_LOOKUP_CSV,
+                          SRC_DIR)
 
 # %%
 # Variables
 TREES_CSV = CARBON_POOLS_OUTDIR / "trees.csv"
-TREES_WD_CSV = CARBON_POOLS_OUTDIR / "trees_with_wood_density.csv"
 SAPLING_CSV = CARBON_POOLS_OUTDIR / "saplings_ntv_litter.csv"
 PLOT_INFO_CSV = CARBON_POOLS_OUTDIR / "plot_info.csv"
+TREES_SPECIES_CSV = CARBON_POOLS_OUTDIR / "trees_with_names.csv"
+TREES_WD_CSV = CARBON_POOLS_OUTDIR / "trees_with_wood_density.csv"
 
 # BigQuery Variables
 DATASET_ID = "carbon_stock"
@@ -197,24 +190,24 @@ trees.loc[(trees.code_family.notna()), "family_name"] = family_trees.loc[
 ]
 
 # %%
-trees.fillna({"scientific_name": "Unknown", "family_name": "Unknown"}, inplace=True)
+# trees.fillna({"scientific_name": "Unknown", "family_name": "Unknown"}, inplace=True)
 
 # %%
-trees[(trees["scientific_name"] == "Unknown") & (trees["family_name"] == "Unknown")]
+trees.info()
 
 # %%
-trees.to_csv(CARBON_POOLS_OUTDIR / "trees_with_names.csv", index=False)
+trees.to_csv(TREES_SPECIES_CSV, index=False)
 
 # %% [markdown]
 # ## Get genus and wood density using BIOMASS R library
 #
 # Wood density was generated using [BIOMASS](https://www.rdocumentation.org/packages/BIOMASS/versions/2.1.11) library from R. For further information,
 
-# %% [markdown]
-# [To do]: insert running r script to get wood density and genus using R
+# %%
+# !Rscript $SRC_DIR"/get_wood_density.R" $TREES_SPECIES_CSV $TREES_WD_CSV
 
 # %%
-trees = pd.read_csv(CARBON_POOLS_OUTDIR / "trees_with_wood_density.csv")
+trees = pd.read_csv(TREES_WD_CSV)
 
 # %%
 trees.head(2)
@@ -262,39 +255,36 @@ trees = vmd0001_eq1(trees, 0.47)
 # %%
 trees.head(2)
 
-
 # %% [markdown]
 # ## Calculate below ground biomass
 
+# %%
+trees = vmd0001_eq5(
+    trees,
+)
+
+# %% [markdown]
+# ## Export data and Upload to BQ
 
 # %%
-def vmd0001_eq5(
-    df: pd.DataFrame,
-    carbon_stock_col: str = "aboveground_carbon_stock",
-    eco_zone: str = "tropical_rainforest",
-):
-    if eco_zone == "tropical_rainforest" or eco_zone == "subtropical_humid":
-        df["below_ground_carbon_stock"] = np.where(
-            df[carbon_stock_col] < 125,
-            df[carbon_stock_col] * 0.20,
-            df[carbon_stock_col] * 0.24,
-        )
-    elif eco_zone == "subtropical_dry":
-        df["below_ground_carbon_stock"] = np.where(
-            df[carbon_stock_col] < 20,
-            df[carbon_stock_col] * 0.56,
-            df[carbon_stock_col] * 0.28,
-        )
-    else:
-        raise ValueError(
-            "Invalid eco_zone value. Please choose a valid eco_zone or add root-to-shoot ratio for the desired ecological zone."
-        )
-
-    return df
-
+trees.info()
 
 # %%
-trees = vmd0001_eq5(trees)
+trees.head(2)
+
+# %%
+# Upload to BQ
+if len(trees) != 0:
+    trees.to_csv(CARBON_STOCK_OUTDIR / "trees_carbon_tonnes.csv", index=False)
+    pandas_gbq.to_gbq(
+        trees,
+        f"{DATASET_ID}.trees_carbon_tonnes",
+        project_id=GCP_PROJ_ID,
+        if_exists=IF_EXISTS,
+        progress_bar=True,
+    )
+else:
+    raise ValueError("Dataframe is empty.")
 
 # %% [markdown]
 # # Calculate sapling biomass
@@ -311,3 +301,35 @@ corrected_radius = 2 / np.cos(plot_info["slope_radians"])
 plot_info["corrected_sapling_area_m2"] = np.pi * corrected_radius * 2
 
 # %%
+saplings = saplings.merge(
+    plot_info[["unique_id", "corrected_sapling_area_m2"]], on="unique_id"
+)
+
+
+# %%
+def vmd0001_eq2(
+    df: pd.DataFrame,
+    biomass_col: str = "aboveground_carbon_tonnes",
+    area_col: str = "corrected_sapling_area_m2",
+):
+    df["CO2e_per_ha"] = ((df[biomass_col] / df[area_col]) * 10) * 44 / 12
+
+    return df
+
+
+# %%
+saplings = vmd0001_eq2(saplings)
+
+# %%
+# Upload to BQ
+if len(saplings) != 0:
+    saplings.to_csv(CARBON_STOCK_OUTDIR / "saplings_carbon_stock.csv", index=False)
+    pandas_gbq.to_gbq(
+        saplings,
+        f"{DATASET_ID}.saplings_carbon_stock",
+        project_id=GCP_PROJ_ID,
+        if_exists=IF_EXISTS,
+        progress_bar=True,
+    )
+else:
+    raise ValueError("Dataframe is empty.")
