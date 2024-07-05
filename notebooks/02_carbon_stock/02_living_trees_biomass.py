@@ -5,7 +5,7 @@
 #       extension: .py
 #       format_name: percent
 #       format_version: '1.3'
-#       jupytext_version: 1.13.1
+#       jupytext_version: 1.16.0
 #   kernelspec:
 #     display_name: onebase
 #     language: python
@@ -17,28 +17,35 @@
 
 # %% [markdown]
 # # Imports and Set-up
-#
-# import os
 
 # %%
 # Standard Imports
 import sys
-
-import numpy as np
 import pandas as pd
+import numpy as np
+
 # Google Cloud Imports
 import pandas_gbq
 
 # %%
 # Util imports
 sys.path.append("../../")  # include parent directory
-from src.biomass_equations import (allometric_peatland_tree,
-                                   allometric_tropical_tree,
-                                   calculate_tree_height, vmd0001_eq1,
-                                   vmd0001_eq5)
-from src.settings import (CARBON_POOLS_OUTDIR, CARBON_STOCK_OUTDIR, DATA_DIR,
-                          GCP_PROJ_ID, PC_PLOT_LOOKUP_CSV, SPECIES_LOOKUP_CSV,
-                          SRC_DIR)
+from src.settings import (
+    GCP_PROJ_ID,
+    CARBON_POOLS_OUTDIR,
+    CARBON_STOCK_OUTDIR,
+    SPECIES_LOOKUP_CSV,
+    PC_PLOT_LOOKUP_CSV,
+)
+
+from src.biomass_equations import (
+    calculate_tree_height,
+    allometric_tropical_tree,
+    allometric_peatland_tree,
+    vmd0001_eq1,
+    vmd0001_eq2,
+    vmd0001_eq5,
+)
 
 # %%
 # Variables
@@ -67,7 +74,7 @@ if PLOT_INFO_CSV.exists():
 else:
     query = f"""
     SELECT
-        *
+        * 
     FROM {GCP_PROJ_ID}.{DATASET_ID}.plot_info"""
 
     # Read the BigQuery table into a dataframe
@@ -85,8 +92,8 @@ if TREES_CSV.exists():
     trees = pd.read_csv(TREES_CSV)
 else:
     query = f"""
-    SELECT
-        *
+    SELECT 
+        * 
     FROM {GCP_PROJ_ID}.{DATASET_ID}.trees"""
 
     # Read the BigQuery table into a dataframe
@@ -115,8 +122,8 @@ if SAPLING_CSV.exists():
     saplings = pd.read_csv(SAPLING_CSV)
 else:
     query = f"""
-    SELECT
-        *
+    SELECT 
+        * 
     FROM {GCP_PROJ_ID}.{DATASET_ID}.saplings_ntv_litter"""
 
     # Read the BigQuery table into a dataframe
@@ -201,7 +208,7 @@ trees.to_csv(TREES_SPECIES_CSV, index=False)
 # %% [markdown]
 # ## Get genus and wood density using BIOMASS R library
 #
-# Wood density was generated using [BIOMASS](https://www.rdocumentation.org/packages/BIOMASS/versions/2.1.11) library from R. For further information,
+# Wood density was generated using [BIOMASS](https://www.rdocumentation.org/packages/BIOMASS/versions/2.1.11) library from R. For further information, 
 
 # %%
 # !Rscript $SRC_DIR"/get_wood_density.R" $TREES_SPECIES_CSV $TREES_WD_CSV
@@ -232,13 +239,15 @@ trees = trees.merge(plot_strata[["unique_id", "Strata"]], on="unique_id", how="l
 trees.head(2)
 
 # %% [markdown]
-# ## Calculate biomass and carbon stock for tree AGB
+# ## Calculate biomass and carbon stock for tree AGB 
 
 # %%
 tropical_trees = trees.loc[trees["Strata"].isin([1, 2, 3])].copy()
 
 # %%
-tropical_trees = allometric_tropical_tree(tropical_trees, "meanWD", "DBH", "height")
+tropical_trees = allometric_tropical_tree(
+    tropical_trees, "wood_density", "DBH", "height"
+)
 
 # %%
 peatland_trees = trees.loc[trees["Strata"].isin([4, 5, 6])].copy()
@@ -304,18 +313,6 @@ plot_info["corrected_sapling_area_m2"] = np.pi * corrected_radius * 2
 saplings = saplings.merge(
     plot_info[["unique_id", "corrected_sapling_area_m2"]], on="unique_id"
 )
-
-
-# %%
-def vmd0001_eq2(
-    df: pd.DataFrame,
-    biomass_col: str = "aboveground_carbon_tonnes",
-    area_col: str = "corrected_sapling_area_m2",
-):
-    df["CO2e_per_ha"] = ((df[biomass_col] / df[area_col]) * 10) * 44 / 12
-
-    return df
-
 
 # %%
 saplings = vmd0001_eq2(saplings)
