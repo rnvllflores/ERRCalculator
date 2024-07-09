@@ -18,6 +18,7 @@ def calculate_tree_height(df, dbh_column):
     Returns:
     - df (pandas.DataFrame): The input DataFrame with an additional 'height' column representing the calculated tree height.
     """
+    df = df.copy()
     height_column = np.minimum(35.83 - 31.15 * np.exp(-0.029 * df[dbh_column]), 30)
     df["height"] = height_column
     return df
@@ -44,6 +45,8 @@ def allometric_tropical_tree(df, wooddensity_col, dbh_col, height_col):
     Returns:
     pandas.DataFrame: The input dataframe with an additional column 'aboveground_biomass' representing the calculated aboveground biomass in tons.
     """
+
+    df = df.copy()
     df["aboveground_biomass"] = 10 * (
         0.0673 * ((df[wooddensity_col] * df[height_col] * df[dbh_col] ** 2) ** 0.976)
     )
@@ -75,6 +78,7 @@ def allometric_peatland_tree(df, dbh_col):
     aboveground_biomass = 10 * (21.297 - (6.53 * trees[dbh_col]) + (0.74 * trees[dbh_col]**2)) The factor 10 is used to convert the biomass from kg to metric tons.
 
     """
+    df = df.copy()
     df["aboveground_biomass"] = 10 * (
         21.297 - (6.53 * df[dbh_col]) + (0.74 * df[dbh_col] ** 2)
     )
@@ -103,6 +107,7 @@ def vmd0001_eq1(
     Returns:
     - DataFrame: The input data with additional columns for carbon stock.
     """
+    df = df.copy()
 
     if not is_sapling:
         df["aboveground_carbon_tonnes"] = df["aboveground_biomass"] * carbon_fraction
@@ -132,6 +137,7 @@ def vmd0001_eq2(
     Returns:
         pd.DataFrame: The input DataFrame with an additional column "CO2e_per_ha" representing CO2e per hectare.
     """
+    df = df.copy()
     df["CO2e_per_ha"] = ((df[biomass_col] / df[area_col]) * 10) * 44 / 12
 
     return df
@@ -142,6 +148,8 @@ def vmd0001_eq5(
     carbon_stock_col: str = "aboveground_carbon_tonnes",
     eco_zone: str = "tropical_rainforest",
 ):
+    df = df.copy()
+
     if eco_zone == "tropical_rainforest" or eco_zone == "subtropical_humid":
         df["below_ground_carbon_tonnes"] = np.where(
             df[carbon_stock_col] < 125,
@@ -161,6 +169,37 @@ def vmd0001_eq5(
 
     return df
 
+
+def vmd0002_eq2(df: pd.DataFrame, base_diameter_col: str, top_diamter_col: str, height_col: str, density_col: str):
+    """
+    Calculate the biomass based on the given parameters.
+
+    Parameters:
+    df (pd.DataFrame): The input DataFrame.
+    base_diameter_col (str): The column name for the base diameter.
+    top_diamter_col (str): The column name for the top diameter.
+    height_col (str): The column name for the height.
+    density_col (str): The column name for the density.
+
+    Returns:
+    pd.DataFrame: The DataFrame with an additional 'biomass' column.
+    """
+    df = df.copy()
+    df['biomass'] = ((df[base_diameter_col] + df[top_diamter_col]) / 200) * df[height_col] * df[density_col]
+
+    return df
+
+def vmd0002_eq7(df: pd.DataFrame, diamter_col: str, transect_l: int = 100) -> pd.DataFrame:
+    df = df.copy()
+    df['deadwood_volume'] = (np.pi**2 * ((df[diamter_col])**2)) / (8 * transect_l)
+    return df
+
+def vmd0002_eq8(df: pd.DataFrame, density_col: str, density_equivalent: dict = {1: 0.54, 2: 0.35, 3: 0.21}, default_density: float = 0.21) -> pd.DataFrame:
+    df = df.copy()
+    
+    density = df[density_col].replace(density_equivalent).fillna(default_density)
+    df['biomass'] = df['deadwood_volume'] * density
+    return df
 
 def vmd0003_eq1(
     data: pd.DataFrame,
@@ -186,6 +225,8 @@ def vmd0003_eq1(
     Returns:
     DataFrame: The input data with additional columns for dry biomass and carbon stock.
     """
+    df = df.copy()
+
     # remove water content
     data.loc[:, "dry_biomass"] = data[col_name] * water_content
 
