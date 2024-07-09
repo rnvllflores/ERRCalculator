@@ -318,6 +318,9 @@ saplings = saplings.merge(
 saplings = vmd0001_eq2(saplings)
 
 # %%
+saplings.info()
+
+# %%
 # Upload to BQ
 if len(saplings) != 0:
     saplings.to_csv(CARBON_STOCK_OUTDIR / "saplings_carbon_stock.csv", index=False)
