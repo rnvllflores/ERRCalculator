@@ -56,6 +56,7 @@ TREES_SPECIES_CSV = CARBON_POOLS_OUTDIR / "trees_with_names.csv"
 TREES_WD_CSV = CARBON_POOLS_OUTDIR / "trees_with_wood_density.csv"
 
 # BigQuery Variables
+SRC_DATASET_ID = "biomass_inventory"
 DATASET_ID = "carbon_stock"
 IF_EXISTS = "replace"
 
@@ -75,7 +76,7 @@ else:
     query = f"""
     SELECT
         * 
-    FROM {GCP_PROJ_ID}.{DATASET_ID}.plot_info"""
+    FROM {GCP_PROJ_ID}.{SRC_DATASET_ID}.plot_info"""
 
     # Read the BigQuery table into a dataframe
     plot_info = pandas_gbq.read_gbq(query, project_id=GCP_PROJ_ID)
@@ -94,7 +95,7 @@ else:
     query = f"""
     SELECT 
         * 
-    FROM {GCP_PROJ_ID}.{DATASET_ID}.trees"""
+    FROM {GCP_PROJ_ID}.{SRC_DATASET_ID}.trees"""
 
     # Read the BigQuery table into a dataframe
     trees = pandas_gbq.read_gbq(query, project_id=GCP_PROJ_ID)
@@ -124,7 +125,7 @@ else:
     query = f"""
     SELECT 
         * 
-    FROM {GCP_PROJ_ID}.{DATASET_ID}.saplings_ntv_litter"""
+    FROM {GCP_PROJ_ID}.{SRC_DATASET_ID}.saplings_ntv_litter"""
 
     # Read the BigQuery table into a dataframe
     saplings = pandas_gbq.read_gbq(query, project_id=GCP_PROJ_ID)
@@ -176,28 +177,30 @@ elif OUTLIER_REMOVAL == "eq_150":
 # ## Add species using lookup table
 
 # %%
-species_trees = trees.merge(species, on="code_species", how="left")
+species_dict = (
+    species[["scientific_name", "code_species"]]
+    .set_index("code_species")
+    .to_dict()["scientific_name"]
+)
 
 # %%
-# add species name based on lookup file
-trees["scientific_name"] = species_trees["scientific_name"]
-
-# add family name based on lookup file
-trees["family_name"] = species_trees["family"]
+trees["scientific_name"] = trees["code_species"].replace(species_dict)
 
 # %%
+# create lookup table for family name and code
 species_family = species[["code_family", "family"]].drop_duplicates()
 
 # %%
-family_trees = trees.merge(species_family, on="code_family", how="left")
+family_dict = species_family.set_index("code_family").to_dict()["family"]
 
 # %%
-trees.loc[(trees.code_family.notna()), "family_name"] = family_trees.loc[
-    (family_trees.code_family.notna()), "family"
-]
+trees["family_name"] = trees["code_family"].replace(family_dict)
 
 # %%
-# trees.fillna({"scientific_name": "Unknown", "family_name": "Unknown"}, inplace=True)
+trees
+
+# %%
+trees[(trees.scientific_name.notnull()) & (trees.code_family.isnull())]
 
 # %%
 trees.info()
