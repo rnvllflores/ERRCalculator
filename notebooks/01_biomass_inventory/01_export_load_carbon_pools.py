@@ -5,7 +5,7 @@
 #       extension: .py
 #       format_name: percent
 #       format_version: '1.3'
-#       jupytext_version: 1.13.1
+#       jupytext_version: 1.16.0
 #   kernelspec:
 #     display_name: onebase
 #     language: python
@@ -20,19 +20,14 @@
 
 # %% [markdown]
 # # Imports and Set-up
-#
-# import os
-# import re
 
 # %%
 # Standard Imports
 import sys
 import urllib.request
-from math import atan
-
-import matplotlib.pyplot as plt
-import numpy as np
 import pandas as pd
+import numpy as np
+from math import atan
 
 # Google Cloud Imports
 import pandas_gbq
@@ -40,16 +35,16 @@ import pandas_gbq
 # %%
 # Util imports
 sys.path.append("../../")  # include parent directory
+from src.settings import DATA_DIR, GCP_PROJ_ID, CARBON_POOLS_OUTDIR
 from src.odk_data_parsing import (
+    extract_trees,
+    extract_stumps,
     extract_dead_trees_class1,
     extract_dead_trees_class2s,
     extract_dead_trees_class2t,
     extract_ldw_with_hollow,
     extract_ldw_wo_hollow,
-    extract_stumps,
-    extract_trees,
 )
-from src.settings import CARBON_POOLS_OUTDIR, DATA_DIR, GCP_PROJ_ID
 
 # %%
 # Variables
@@ -128,10 +123,11 @@ else:
 # ## Add a unique ID
 
 # %%
+plot_types = {"primary": 1, "backup": 2}
+
+# %%
 # Create a new column with "1" for Primary and "2" for Backup
-data["plot_type_short"] = data["plot_info/plot_type"].apply(
-    lambda x: "1" if x == "Primary" else "2"
-)
+data["plot_type_short"] = data["plot_info/plot_type"].replace(plot_types)
 
 # Extract subplot letters (assuming they are included in the 'plot_info.sub_plot' column)
 data["subplot_letter"] = data["plot_info/sub_plot"].str.replace("sub_plot", "")
@@ -140,8 +136,15 @@ data["subplot_letter"] = data["plot_info/sub_plot"].str.replace("sub_plot", "")
 data["unique_id"] = (
     data["plot_info/plot_code_nmbr"].astype(str)
     + data["subplot_letter"]
-    + data["plot_type_short"]
+    + data["plot_type_short"].astype(str)
 )
+
+# %%
+data[
+    data.unique_id.isin(
+        data.loc[data.duplicated(subset="unique_id"), "unique_id"].unique()
+    )
+].sort_values("unique_id")
 
 # %% [markdown]
 # # Extract Plot info
@@ -317,11 +320,15 @@ plot_info["slope_radians"] = plot_info["slope"].apply(lambda x: atan(x / 100))
 
 # %%
 # Calculate corrected radius based on slope (in radians)
-corrected_radius = 20 / np.cos(plot_info["slope_radians"])
+corrected_radius_n2 = 5 / np.cos(plot_info["slope_radians"])
+corrected_radius_n3 = 15 / np.cos(plot_info["slope_radians"])
+corrected_radius_n4 = 20 / np.cos(plot_info["slope_radians"])
 
 # %%
 # Calculate new total subplot area based on corrected radius
-plot_info["corrected_plot_area_m2"] = np.pi * corrected_radius * 20
+plot_info["corrected_plot_area_n2_m2"] = np.pi * corrected_radius_n2**2
+plot_info["corrected_plot_area_n3_m2"] = np.pi * corrected_radius_n3**2
+plot_info["corrected_plot_area_n4_m2"] = np.pi * corrected_radius_n4**2
 
 # %%
 plot_info.info(), plot_info.head(2)
@@ -457,25 +464,15 @@ pandas_gbq.to_gbq(
 dead_trees_c1 = extract_dead_trees_class1(data, NESTS)
 
 # %%
+if not dead_trees_c1.empty:
+    dead_trees_c1["class"] = 1
+    dead_trees_c1["subclass"] = np.nan
+
+# %%
 dead_trees_c1.info(), dead_trees_c1.head(2)
 
 # %%
 dead_trees_c1.describe()
-
-# %% [markdown]
-# ## Export data and upload to BQ
-
-# %%
-dead_trees_c1.to_csv(CARBON_POOLS_OUTDIR / "dead_trees_class1.csv", index=False)
-
-# %%
-# Upload to BQ
-pandas_gbq.to_gbq(
-    dead_trees_c1,
-    f"{DATASET_ID}.dead_trees_c1",
-    project_id=GCP_PROJ_ID,
-    if_exists=IF_EXISTS,
-)
 
 # %% [markdown]
 # # Dead Trees: Class 2 - short
@@ -486,23 +483,10 @@ dead_trees_c2s = extract_dead_trees_class2s(data, NESTS)
 # %%
 dead_trees_c2s.info(), dead_trees_c2s.head(2)
 
-# %% [markdown]
-# ## Export data and upload to BQ
-
 # %%
-# Export CSV
-if len(dead_trees_c2s) != 0:
-    dead_trees_c2s.to_csv(CARBON_POOLS_OUTDIR / "dead_trees_class2.csv", index=False)
-
-# %%
-# Upload to BQ
-if len(dead_trees_c2s) != 0:
-    pandas_gbq.to_gbq(
-        dead_trees_c2s,
-        f"{DATASET_ID}.dead_trees_c2s",
-        project_id=GCP_PROJ_ID,
-        if_exists=IF_EXISTS,
-    )
+if not dead_trees_c2s.empty:
+    dead_trees_c2s["class"] = 2
+    dead_trees_c2s["subclass"] = "short"
 
 # %% [markdown]
 # # Dead Trees: Class 2 - Tall
@@ -513,22 +497,34 @@ dead_trees_c2t = extract_dead_trees_class2t(data, NESTS)
 # %%
 dead_trees_c2t.info(), dead_trees_c2t.head(2)
 
+# %%
+if not dead_trees_c2t.empty:
+    dead_trees_c2t["class"] = 2
+    dead_trees_c2t["subclass"] = "tall"
+
+# %% [markdown]
+# # Combine into one table
+
+# %%
+dead_trees = pd.concat([dead_trees_c1, dead_trees_c2s, dead_trees_c2t])
+
+# %%
+dead_trees.info(), dead_trees.head(2)
+
 # %% [markdown]
 # ## Export data and upload to BQ
 
 # %%
 # Export CSV
-if len(dead_trees_c2t) != 0:
-    dead_trees_c2t.to_csv(
-        CARBON_POOLS_OUTDIR / "dead_trees_class2_tall.csv", index=False
-    )
+if len(dead_trees) != 0:
+    dead_trees.to_csv(CARBON_POOLS_OUTDIR / "dead_trees.csv", index=False)
 
 # %%
 # Upload to BQ
-if len(dead_trees_c2t) != 0:
+if len(dead_trees) != 0:
     pandas_gbq.to_gbq(
-        dead_trees_c2t,
-        f"{DATASET_ID}.dead_trees_c2t",
+        dead_trees,
+        f"{DATASET_ID}.dead_trees",
         project_id=GCP_PROJ_ID,
         if_exists=IF_EXISTS,
     )
