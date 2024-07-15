@@ -3,7 +3,12 @@ import pandas as pd
 
 
 # height model
-def calculate_tree_height(df, dbh_column):
+def calculate_tree_height(df: pd.DataFrame, 
+                          dbh_column: str = np.nan, 
+                          trig_leveling: bool = False, 
+                          dist_col: str = np.nan, 
+                          slope_b_col: str = np.nan,
+                          slope_t_col: str = np.nan) -> pd.DataFrame:
     """
     Calculates the height of trees based on the diameter at breast height (DBH).
     The equation is based on T. R. Feldpausch, et al. which assumes Ht = 35.83 − 31.15 × exp(−0.029 × DBH)
@@ -18,16 +23,25 @@ def calculate_tree_height(df, dbh_column):
     Returns:
     - df (pandas.DataFrame): The input DataFrame with an additional 'height' column representing the calculated tree height.
     """
+    
     df = df.copy()
-    height_column = np.minimum(35.83 - 31.15 * np.exp(-0.029 * df[dbh_column]), 30)
-    df["height"] = height_column
+    
+    if not trig_leveling:
+        height_column = np.minimum(35.83 - 31.15 * np.exp(-0.029 * df[dbh_column]), 30)
+        df["height"] = height_column
+    else:
+        df["height"] = np.where(
+        df[slope_t_col] > df[slope_b_col],
+        df[dist_col] * np.tan(np.tan(df[slope_t_col] - df[slope_b_col])),
+        df[dist_col] * np.tan(np.tan(df[slope_b_col] - df[slope_t_col]))
+)
     return df
 
 
 def allometric_tropical_tree(df, wooddensity_col, dbh_col, height_col):
     """
     Calculates the aboveground biomass of tropical trees using allometric equation based on Chave, et al. (2015) which assumes
-    10 * (0.0673 * ((wood density * height * dbh^2)^0.976))
+    10 * (0.0673 * ((wood density * height * dbh^2)^0.976)). The output is divided by 1000 to convert from kg to metric tonnes.
 
     References:
     Chave, Jérôme & Réjou-Méchain, Maxime & Burquez, Alberto & Chidumayo, Emmanuel & Colgan, Matthew & Delitti, Welington & Duque, Alvaro & Eid, Tron & Fearnside, Philip & Goodman, Rosa & Henry, Matieu & Martinez-Yrizar, Angelina & Mugasha, Wilson & Muller-Landau, Helene & Mencuccini, Maurizio & Nelson, Bruce & Ngomanda, Alfred & Nogueira, Euler & Ortiz, Edgar & Vieilledent, Ghislain. (2014). Improved allometric models to estimate the aboveground biomass of tropical trees. Global Change Biology. 20. 3177-3190. 10.1111/gcb.12629.
@@ -47,9 +61,9 @@ def allometric_tropical_tree(df, wooddensity_col, dbh_col, height_col):
     """
 
     df = df.copy()
-    df["aboveground_biomass"] = 10 * (
+    df["aboveground_biomass"] = (
         0.0673 * ((df[wooddensity_col] * df[height_col] * df[dbh_col] ** 2) ** 0.976)
-    )
+    )/1000
 
     return df
 
@@ -57,7 +71,7 @@ def allometric_tropical_tree(df, wooddensity_col, dbh_col, height_col):
 def allometric_peatland_tree(df, dbh_col):
     """
     Calculates the aboveground biomass of trees in a peatland using allometric equation based on Alibo, et al. (2012) which assumes
-    10 * (21.297 - (6.53 * DBH) + (0.74 * DBH^2))
+    10 * (21.297 - (6.53 * DBH) + (0.74 * DBH^2)). The output is divided by 1000 to convert from kg to metric tonnes.
 
     References:
     Alibo, L.B. & Lasco, Rodel. (2012). Carbon Storage of Caimpugan Peatland in Agusan Marsh, Philippines and its Role in Greenhouse Gas Mitigation. Journal of Environmental Science and Management. 15. 50-58.
@@ -79,11 +93,33 @@ def allometric_peatland_tree(df, dbh_col):
 
     """
     df = df.copy()
-    df["aboveground_biomass"] = 10 * (
+    df["aboveground_biomass"] = (
         21.297 - (6.53 * df[dbh_col]) + (0.74 * df[dbh_col] ** 2)
-    )
+    )/1000
     return df
 
+def get_solid_diamter(df: pd.DataFrame, 
+                       hollow_diameter_1_col: str, 
+                       hollow_diameter_2_col: str,
+                       diameter_col: str) -> pd.DataFrame:
+    df = df.copy()
+
+    #Get area of ldw based on the diameter
+    ldw_area = np.pi * (df[diameter_col]/2)**2
+
+    # Get the average of the two hollow diameters
+    avg_hollow_diameter = df[[hollow_diameter_1_col, hollow_diameter_2_col]].mean(axis=1)
+
+    # Get the area of the hollow
+    hollow_area = np.pi * (avg_hollow_diameter/2)**2
+
+    # Get the area of the solid part of the ldw
+    solid_area = ldw_area - hollow_area
+
+    # Get the diameter of the solid part of the ldw
+    df['solid_diameter'] = np.sqrt((solid_area/np.pi))*2
+
+    return df
 
 def vmd0001_eq1(
     df: pd.DataFrame,
@@ -169,6 +205,16 @@ def vmd0001_eq5(
 
     return df
 
+def vmd0002_eq1(df: pd.DataFrame,
+                diameter_col:str, 
+                height_col:str,
+                density_col:str) -> pd.DataFrame:
+    df = df.copy()
+
+    # Calculate the biomass of each tree
+    df['tonnes_dry_matter'] = (1/3) * np.pi * (df[diameter_col]/200)**2 * df[height_col] * df[density_col]
+
+    return df
 
 def vmd0002_eq2(df: pd.DataFrame, base_diameter_col: str, top_diamter_col: str, height_col: str, density_col: str):
     """
@@ -185,7 +231,21 @@ def vmd0002_eq2(df: pd.DataFrame, base_diameter_col: str, top_diamter_col: str, 
     pd.DataFrame: The DataFrame with an additional 'biomass' column.
     """
     df = df.copy()
-    df['biomass'] = ((df[base_diameter_col] + df[top_diamter_col]) / 200) * df[height_col] * df[density_col]
+    df['tonnes_dry_matter'] = ((df[base_diameter_col] + df[top_diamter_col]) / 200) * df[height_col] * df[density_col]
+
+    return df
+
+def vmd0002_eq3(df:pd.DataFrame, agg_cols:list, tdm_col:str):
+    subset = agg_cols.copy()
+    subset.extend([tdm_col])
+    df = df[subset].copy()
+    df = df.groupby(agg_cols).sum().reset_index()
+    return df
+
+def vmd0002_eq4(df:pd.DataFrame, biomass_col:str, area_ha_col:str):
+    df =df.copy()
+
+    df['tonnes_dry_matter_ha'] = df[biomass_col] / df[area_ha_col]
 
     return df
 
@@ -198,7 +258,7 @@ def vmd0002_eq8(df: pd.DataFrame, density_col: str, density_equivalent: dict = {
     df = df.copy()
     
     density = df[density_col].replace(density_equivalent).fillna(default_density)
-    df['biomass'] = df['deadwood_volume'] * density
+    df['tonnes_dry_matter'] = df['deadwood_volume'] * density
     return df
 
 def vmd0003_eq1(
