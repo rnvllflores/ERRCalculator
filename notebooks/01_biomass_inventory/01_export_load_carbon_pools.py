@@ -29,6 +29,9 @@ import pandas as pd
 import numpy as np
 from math import atan
 
+# geospatial imports
+import geopandas as gpd
+
 # Google Cloud Imports
 import pandas_gbq
 
@@ -139,12 +142,93 @@ data["unique_id"] = (
     + data["plot_type_short"].astype(str)
 )
 
+# %% [markdown]
+# ## Check for duplicate plot IDs
+
 # %%
 data[
     data.unique_id.isin(
         data.loc[data.duplicated(subset="unique_id"), "unique_id"].unique()
     )
 ].sort_values("unique_id")
+
+# %% [markdown]
+# ### Assign corrected plot IDs to each duplicate
+# The subset of duplicates were manually inspected to correct the issue. The common source of the duplicates were typo errors in the plot ID or sublot letter, there were other instances that abandoned subplots persisted in the dataset
+
+# %%
+# load dataframe with manually annotated plot id corrections
+plot_id_corrections = gpd.read_file(
+    DATA_DIR / "gpkg" / "duplicate_plots_corrected.gpkg"
+)
+
+# %%
+plot_id_corrections.head(2)
+
+# %% vscode={"languageId": "markdown"}
+# Drop rows where the geometry is empty, this indicates that these plots were abandoned
+plot_id_corrections = plot_id_corrections[~plot_id_corrections.geometry.is_empty].copy()
+
+# %%
+plot_id_corrections = plot_id_corrections[
+    plot_id_corrections["unique_id_updated"] != "flag"
+]
+
+# %%
+plot_id_corrections.shape
+
+# %%
+# create a uuid to match duplicates from the original data
+plot_id_corrections["uuid"] = (
+    plot_id_corrections["unique_id"]
+    + plot_id_corrections["slope"].astype(str)
+    + plot_id_corrections["team_no"].astype(str)
+)
+
+# %%
+plot_id_corrections.uuid.nunique()
+
+# %%
+# define a dictionary to map the updated unique_id to the uuid
+uuid_dict = (
+    plot_id_corrections[["unique_id_updated", "uuid"]]
+    .set_index("uuid")
+    .to_dict()["unique_id_updated"]
+)
+
+# %%
+uuid_dict
+
+# %%
+data["uuid"] = (
+    data["unique_id"]
+    + data["slope/slope"].astype(str)
+    + data["plot_info/team_no"].astype(str)
+)
+
+# %%
+data["unique_id_updated"] = data["uuid"].map(uuid_dict).fillna(np.nan)
+
+# %%
+# update the unique_id where it is necessary
+data["unique_id"] = data["unique_id_updated"].fillna(data["unique_id"])
+
+# %%
+# check for remaining duplicates
+duplicates = data[
+    data.unique_id.isin(
+        data.loc[data.duplicated(subset="unique_id"), "unique_id"].unique()
+    )
+].sort_values("unique_id")
+
+# %%
+# these are duplicate entries where both abandoned and active plots
+# are present, drop those without an updated unique_id
+duplicates
+
+# %%
+# save uuid to a list, do not drop here yet since it appears that these rows contain data
+duplicates_drop = duplicates.loc[duplicates["unique_id_updated"].isna(), "uuid"]
 
 # %% [markdown]
 # # Extract Plot info
@@ -183,6 +267,7 @@ plot_info_cols = [
     "slope/slope",
     "canopy/avg_height",
     "canopy/can_cov",
+    "uuid",
 ]
 
 # %%
@@ -226,6 +311,14 @@ plot_info_cols = {
 
 # %%
 plot_info.rename(columns=plot_info_cols, inplace=True)
+
+# %%
+# drop duplicate plot id here since remaining duplicates
+# have empty geometry
+plot_info = plot_info[~plot_info["uuid"].isin(duplicates_drop)].copy()
+
+# %%
+plot_info.drop(columns=["uuid"], inplace=True)
 
 # %% [markdown]
 # ### Set correct data types
@@ -490,6 +583,8 @@ if not dead_trees_c2s.empty:
 
 # %% [markdown]
 # # Dead Trees: Class 2 - Tall
+
+# %%
 
 # %%
 dead_trees_c2t = extract_dead_trees_class2t(data, NESTS)
