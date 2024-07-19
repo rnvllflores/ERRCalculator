@@ -50,6 +50,7 @@ certifi==2024.6.2
     #   fiona
     #   httpcore
     #   httpx
+    #   pyogrio
     #   pyproj
     #   rasterio
     #   requests
@@ -110,9 +111,7 @@ fastprogress==1.0.3
 filelock==3.15.3
     # via virtualenv
 fiona==1.9.6
-    # via
-    #   geopandas
-    #   rasterstats
+    # via rasterstats
 folium==0.17.0
     # via -r requirements.in
 fonttools==4.53.0
@@ -121,7 +120,7 @@ fqdn==1.5.1
     # via jsonschema
 gdal==3.9.0
     # via -r requirements.in
-geopandas==0.14.4
+geopandas===1.0.1
     # via
     #   -r requirements.in
     #   geowrangler
@@ -333,6 +332,7 @@ numpy==2.0.0
     #   pandas
     #   pandas-gbq
     #   pyarrow
+    #   pyogrio
     #   rasterio
     #   rasterstats
     #   scikit-learn
@@ -357,6 +357,7 @@ packaging==24.1
     #   matplotlib
     #   nbconvert
     #   pandas-gbq
+    #   pyogrio
     #   pytest
 pandas==2.2.2
     # via
@@ -430,6 +431,8 @@ pygments==2.18.0
     # via
     #   ipython
     #   nbconvert
+pyogrio==0.9.0
+    # via geopandas
 pyparsing==3.1.2
     # via
     #   httplib2
