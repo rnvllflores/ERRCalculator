@@ -94,7 +94,7 @@ def allometric_peatland_tree(df, dbh_col):
     """
     df = df.copy()
     df["aboveground_biomass"] = (
-        21.297 - (67.953 * df[dbh_col]) + (0.74 * df[dbh_col] ** 2)
+        21.297 - 67.953 * df[dbh_col] + 0.74 * df[dbh_col] ** 2
     )/1000
     return df
 
@@ -174,7 +174,7 @@ def vmd0001_eq2(
         pd.DataFrame: The input DataFrame with an additional column "CO2e_per_ha" representing CO2e per hectare.
     """
     df = df.copy()
-    df["CO2e_per_ha"] = ((df[biomass_col] / df[area_col]) * 10) * 44 / 12
+    df["CO2e_per_ha"] = ((df[biomass_col] / df[area_col])) * 44 / 12
 
     return df
 
@@ -249,7 +249,7 @@ def vmd0002_eq4(df:pd.DataFrame, biomass_col:str, area_ha_col:str):
 
 def vmd0002_eq7(df: pd.DataFrame, diamter_col: str, transect_l: int = 100) -> pd.DataFrame:
     df = df.copy()
-    df['deadwood_volume'] = (np.pi**2 * ((df[diamter_col])**2)) / (8 * transect_l)
+    df['deadwood_volume'] = ((df[diamter_col])**2) / (8 * transect_l)
     return df
 
 def vmd0002_eq8a(df: pd.DataFrame, density_col: str, density_equivalent: dict = {1: 0.54, 2: 0.35, 3: 0.21}, default_density: float = 0.21) -> pd.DataFrame:
