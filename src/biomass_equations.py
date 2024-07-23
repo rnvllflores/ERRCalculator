@@ -94,7 +94,7 @@ def allometric_peatland_tree(df, dbh_col):
     """
     df = df.copy()
     df["aboveground_biomass"] = (
-        21.297 - (6.53 * df[dbh_col]) + (0.74 * df[dbh_col] ** 2)
+        21.297 - (67.953 * df[dbh_col]) + (0.74 * df[dbh_col] ** 2)
     )/1000
     return df
 
@@ -182,26 +182,24 @@ def vmd0001_eq2(
 def vmd0001_eq5(
     df: pd.DataFrame,
     carbon_stock_col: str = "aboveground_carbon_tonnes",
-    eco_zone: str = "tropical_rainforest",
-):
+) -> pd.DataFrame:
+    """
+    Calculate the belowground carbon stock based on the aboveground carbon stock and eco zone.
+
+    Parameters:
+    - df (pd.DataFrame): The input DataFrame containing the aboveground carbon stock.
+    - carbon_stock_col (str, optional): The column name of the aboveground carbon stock data. Default value is "aboveground_carbon_tonnes".
+    - eco_zone (str, optional): The ecological zone. Default value is "tropical_rainforest".
+
+    Returns:
+    - DataFrame: The input data with an additional column for belowground carbon stock.
+    
+    References
+    https://www.ipcc-nggip.iges.or.jp/public/2006gl/pdf/4_Volume4/V4_04_Ch4_Forest_Land.pdf
+    """
     df = df.copy()
 
-    if eco_zone == "tropical_rainforest" or eco_zone == "subtropical_humid":
-        df["below_ground_carbon_tonnes"] = np.where(
-            df[carbon_stock_col] < 125,
-            df[carbon_stock_col] * 0.20,
-            df[carbon_stock_col] * 0.24,
-        )
-    elif eco_zone == "subtropical_dry":
-        df["below_ground_carbon_tonnes"] = np.where(
-            df[carbon_stock_col] < 20,
-            df[carbon_stock_col] * 0.56,
-            df[carbon_stock_col] * 0.28,
-        )
-    else:
-        raise ValueError(
-            "Invalid eco_zone value. Please choose a valid eco_zone or add root-to-shoot ratio for the desired ecological zone."
-        )
+    df["below_ground_carbon_tonnes"] = df[carbon_stock_col] * 0.36
 
     return df
 
@@ -254,11 +252,24 @@ def vmd0002_eq7(df: pd.DataFrame, diamter_col: str, transect_l: int = 100) -> pd
     df['deadwood_volume'] = (np.pi**2 * ((df[diamter_col])**2)) / (8 * transect_l)
     return df
 
-def vmd0002_eq8(df: pd.DataFrame, density_col: str, density_equivalent: dict = {1: 0.54, 2: 0.35, 3: 0.21}, default_density: float = 0.21) -> pd.DataFrame:
+def vmd0002_eq8a(df: pd.DataFrame, density_col: str, density_equivalent: dict = {1: 0.54, 2: 0.35, 3: 0.21}, default_density: float = 0.21) -> pd.DataFrame:
     df = df.copy()
     
     density = df[density_col].replace(density_equivalent).fillna(default_density)
-    df['tonnes_dry_matter'] = df['deadwood_volume'] * density
+    df['tonnes_dry_matter_ha'] = df['deadwood_volume'] * density
+    return df
+
+def vmd0002_eq8b(df: pd.DataFrame,
+                agg_col:list,
+                tdm_col: str = 'tonnes_dry_matter_ha',
+                ) -> pd.DataFrame:
+    df = df.copy()
+    subset = agg_col.copy()
+    subset.extend([tdm_col])
+
+    df = df[subset]
+    df = df.groupby(agg_col).sum()
+
     return df
 
 def vmd0003_eq1(
