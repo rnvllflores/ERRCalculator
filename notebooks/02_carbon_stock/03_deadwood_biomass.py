@@ -33,19 +33,21 @@ sys.path.append("../../")  # include parent directory
 from src.settings import (
     GCP_PROJ_ID,
     CARBON_POOLS_OUTDIR,
+    CARBON_STOCK_OUTDIR,
     SPECIES_LOOKUP_CSV,
     PC_PLOT_LOOKUP_CSV,
     TMP_OUT_DIR,
 )
 
 from src.biomass_equations import (
-    vmd0001_eq1,
     vmd0002_eq1,
     vmd0002_eq2,
     vmd0002_eq3,
     vmd0002_eq4,
     vmd0002_eq7,
-    vmd0002_eq8,
+    vmd0002_eq8a,
+    vmd0002_eq8b,
+    vmd0002_eq9,
     get_solid_diamter,
     calculate_tree_height,
     allometric_tropical_tree,
@@ -93,6 +95,20 @@ else:
 
 # %%
 plot_info.info()
+
+# %%
+# get the slope adjusted area per nest per subplot and creaste dict for substitution
+plot_info_subset = plot_info[
+    [
+        "unique_id",
+        "corrected_plot_area_n2_m2",
+        "corrected_plot_area_n3_m2",
+        "corrected_plot_area_n4_m2",
+    ]
+].copy()
+plot_info_subset.dropna(inplace=True)
+plot_info_subset.drop_duplicates(subset=["unique_id"], inplace=True)
+plot_info_subset_dict = plot_info_subset.to_dict(orient="records")
 
 # %% [markdown]
 # ### Stumps
@@ -244,23 +260,12 @@ stumps.drop(columns=["tonnes_dry_matter_hollow"], inplace=True)
 # %%
 stumps.head(2)
 
+# %% [markdown]
+# ## Get total stump biomass per hectare per subplot
+
 # %%
 # get sum opf dry matter per subplot
 stumps_agg = vmd0002_eq3(stumps, ["unique_id", "nest"], "tonnes_dry_matter")
-
-# %%
-# get the slope adjusted area per nest per subplot
-plot_info_subset = plot_info[
-    [
-        "unique_id",
-        "corrected_plot_area_n2_m2",
-        "corrected_plot_area_n3_m2",
-        "corrected_plot_area_n4_m2",
-    ]
-].copy()
-plot_info_subset.dropna(inplace=True)
-plot_info_subset.drop_duplicates(subset=["unique_id"], inplace=True)
-plot_info_subset_dict = plot_info_subset.to_dict(orient="records")
 
 # %%
 # add the correct area using the unique_id and nest number
@@ -284,15 +289,23 @@ stumps_agg["corrected_area_ha"] = stumps_agg["corrected_area_m2"] / 10_000
 stumps_agg = vmd0002_eq4(stumps_agg, "tonnes_dry_matter", "corrected_area_ha")
 
 # %%
+stumps_agg.head(2)
+
+# %%
 stumps_agg.rename(
     columns={"tonnes_dry_matter_ha": "stumps_tonnes_dry_matter_ha"}, inplace=True
 )
 
-# %% [markdown]
-# ## Get total stump biomass per hectare per subplot
+# %%
+stumps_agg = (
+    stumps_agg[["unique_id", "stumps_tonnes_dry_matter_ha"]]
+    .groupby("unique_id")
+    .mean()
+    .reset_index()
+)
 
 # %%
-stumps_agg
+stumps_agg.head(2)
 
 # %% [markdown]
 # # Calculate Lying deadwood biomass
@@ -314,16 +327,13 @@ ldw.describe()
 ldw = ldw[ldw["diameter"] <= 150]
 
 # %%
-ldw = vmd0002_eq7(ldw, "diameter")
+ldw = vmd0002_eq7(ldw, "diameter", 80)
 
 # %%
-ldw = vmd0002_eq8(ldw, "density")
+ldw = vmd0002_eq8a(ldw, "density")
 
 # %%
 ldw.head(2)
-
-# %% [markdown]
-# ## Get total lyind deadwood biomass from 
 
 # %% [markdown]
 # ## Hollow Lying Deadwood
@@ -332,13 +342,40 @@ ldw.head(2)
 ldw_hollow = get_solid_diamter(ldw_hollow, "hollow_d1", "hollow_d2", "diameter")
 
 # %%
-ldw_hollow = vmd0002_eq7(ldw_hollow, "solid_diameter")
+ldw_hollow = vmd0002_eq7(ldw_hollow, "solid_diameter", 80)
 
 # %%
-ldw_hollow = vmd0002_eq8(ldw_hollow, "density")
+ldw_hollow = vmd0002_eq8a(ldw_hollow, "density")
 
 # %%
 ldw_hollow.head(2)
+
+# %% [markdown]
+# ## Get total lying deadwood biomass per hectare per subplot
+
+# %%
+ldw_subset = ldw[["unique_id", "tonnes_dry_matter_ha"]].copy()
+ldw_hollow_subset = ldw_hollow[["unique_id", "tonnes_dry_matter_ha"]].copy()
+
+# %%
+ldw_all = pd.concat([ldw_subset, ldw_hollow_subset])
+
+# %%
+ldw_all.head(2)
+
+# %%
+ldw_agg = vmd0002_eq8b(ldw_all, agg_col=["unique_id"])
+
+# %%
+ldw_agg.rename(
+    columns={"tonnes_dry_matter_ha": "ldw_tonnes_dry_matter_ha"}, inplace=True
+)
+
+# %%
+ldw_agg.head(2)
+
+# %%
+ldw_agg.info()
 
 # %% [markdown]
 # # Calculate Standing Deadwood Biomass
@@ -412,13 +449,20 @@ c1_dead_trees_peatland = allometric_peatland_tree(c1_dead_trees_peatland, "DBH_c
 c1_dead_trees = pd.concat([c1_dead_trees_tropical, c1_dead_trees_peatland])
 
 # %%
-c1_dead_trees = vmd0001_eq1(c1_dead_trees, 0.47)
-
-# %%
 c1_dead_trees.drop(columns=["X"], inplace=True)
 
 # %%
 c1_dead_trees
+
+# %%
+c1_dead_trees["tonnes_dry_matter"] = c1_dead_trees["aboveground_biomass"] / 1_000
+
+# %%
+# vmd0001_eq5(c1_dead_trees)
+
+# %% [markdown]
+# ## Calculate biomass for Class 2 standing deadwood short trees
+# no short trees (that are not stumps) in the dataset. add in steps when data is available
 
 # %% [markdown]
 # ## Calculate biomass for Class 2  standing deadwood tall trees
@@ -457,3 +501,106 @@ c2_dead_trees_t = vmd0002_eq1(c2_dead_trees_t, "db_tall", "height", "density_val
 
 # %%
 c2_dead_trees_t
+
+# %% [markdown]
+# ### combine class 1 and class 2
+
+# %%
+c2_subset = c2_dead_trees_t[["unique_id", "nest", "tonnes_dry_matter"]].copy()
+c1_subset = c1_dead_trees[["unique_id", "nest", "tonnes_dry_matter"]].copy()
+
+# %%
+sdw_all = pd.concat([c1_subset, c2_subset])
+
+# %%
+sdw_all.head(2)
+
+# %% [markdown]
+# ## get total standing deadwood biomass 
+
+# %%
+sdw_all_agg = vmd0002_eq3(sdw_all, ["unique_id", "nest"], "tonnes_dry_matter")
+
+# %%
+# add the correct area using the unique_id and nest number
+sdw_all_agg["corrected_area_m2"] = sdw_all_agg.apply(
+    lambda x: next(
+        (
+            item["corrected_plot_area_n" + str(x["nest"]) + "_m2"]
+            for item in plot_info_subset_dict
+            if item["unique_id"] == x["unique_id"]
+        ),
+        None,
+    ),
+    axis=1,
+)
+
+# %%
+# convert square meters to hectares
+sdw_all_agg["corrected_area_ha"] = sdw_all_agg["corrected_area_m2"] / 10_000
+
+# %%
+sdw_all_agg = vmd0002_eq4(sdw_all_agg, "tonnes_dry_matter", "corrected_area_ha")
+
+# %%
+sdw_all_agg
+
+# %%
+sdw_all_agg = (
+    sdw_all_agg[["unique_id", "tonnes_dry_matter_ha"]]
+    .groupby("unique_id")
+    .sum()
+    .reset_index()
+)
+
+# %%
+sdw_all_agg.head(2)
+
+# %%
+sdw_all_agg.rename(
+    columns={"tonnes_dry_matter_ha": "sdw_tonnes_dry_matter_ha"}, inplace=True
+)
+
+# %% [markdown]
+# # Get total across all deadwood
+
+# %%
+sdw_all_agg.shape
+
+# %%
+stumps_agg.shape
+
+# %%
+ldw_agg.shape
+
+# %%
+deadwood = vmd0002_eq9(stumps_agg, ldw_agg, sdw_all_agg)
+
+# %%
+deadwood.head(2)
+
+# %%
+deadwood.rename(
+    columns={"CO2e_per_ha": "deadwood_CO2e_per_ha", "tC_per_ha": "deadwood_tC_per_ha"},
+    inplace=True,
+)
+
+# %%
+deadwood.info()
+
+# %% [markdown]
+# ## Export and upload data
+
+# %%
+# Upload to BQ
+if len(deadwood) != 0:
+    deadwood.to_csv(CARBON_STOCK_OUTDIR / "deadwood_carbon_stock.csv", index=False)
+    pandas_gbq.to_gbq(
+        deadwood,
+        f"{DATASET_ID}.deadwood_carbon_stock",
+        project_id=GCP_PROJ_ID,
+        if_exists=IF_EXISTS,
+        progress_bar=True,
+    )
+else:
+    raise ValueError("Dataframe is empty.")
