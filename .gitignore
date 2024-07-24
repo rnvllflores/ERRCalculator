@@ -193,3 +193,4 @@ Temporary Items
 # Add additional files and directories to ignore here
 data/
 src/inventory_calc.R
+data/shp/

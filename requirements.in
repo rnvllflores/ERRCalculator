@@ -1,6 +1,6 @@
 black
 earthengine-api
-geopandas
+geopandas===1.0.1
 gdal
 geowrangler
 jupyterlab

@@ -14,12 +14,13 @@ GCP_PROJ_ID = "clearwind"  # Replace with project ID
 
 # data subdirectories
 CSV_DATA_DIR = DATA_DIR / "csv"
+TMP_OUT_DIR = DATA_DIR / "tmp"
 CARBON_POOLS_OUTDIR = CSV_DATA_DIR / "biomass_inventory"
 CARBON_STOCK_OUTDIR = CSV_DATA_DIR / "carbon_stock"
 
 # lookup tables
 SPECIES_LOOKUP_CSV = SRC_DIR / "lookup" / "species_lookup.csv"
-PC_PLOT_LOOKUP_CSV = SRC_DIR / "lookup" / "pc_plot_lookup.csv"
+PC_PLOT_LOOKUP_CSV = SRC_DIR / "lookup" / "pc_plot_lookup_20240722.csv"
 
 for data_dir in [CSV_DATA_DIR, CARBON_POOLS_OUTDIR, CARBON_STOCK_OUTDIR]:
     data_dir.mkdir(exist_ok=True)

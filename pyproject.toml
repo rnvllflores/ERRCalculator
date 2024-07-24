@@ -3,13 +3,14 @@ requires = ["setuptools >= 69.2.0"]
 build-backend = "setuptools.build_meta"
 
 [project]
-name = "idn-data-mart"
-# version = "2024.4.8"
-description = "Preprocess common geospatial datasets for indonesia."
+name = "geo-retail-data-mart"
+# version = "2024.6.18"
+description = "Prepares data for analytics and modelling (minimizes data processing) in client projects."
 # authors = [ {name = "My Name", email = "myemail@example.com"}, ]
-requires-python = ">= 3.11"
+requires-python = ">= 3.10"
 readme = "README.md"
 dependencies = [
+  "affine",
   "beautifulsoup4",
   "cdsapi",
   "dbt-core",
@@ -24,11 +25,12 @@ dependencies = [
   "gcsfs",
   "gdal",
   "geopandas",
-  "geowrangler>=0.1.1",
+  "geowrangler",
+  "geo-tileset-build-utils @ git+ssh://git@github.com/thinkingmachines/geo-tileset-build-utils.git#main",
   "google-cloud-bigquery[all]",
   "google-cloud-secret-manager",
   "ipyleaflet",
-  "ipywidgets>=7.0",
+  "ipywidgets",
   "jupyterlab",
   "jupytext",
   "keplergl",
@@ -41,12 +43,13 @@ dependencies = [
   "networkx",
   "numpy",
   "pandarallel",
-  "pandas",
+  "pandas>=2.0.0",
   "pandas-gbq",
   "polars",
   "pre-commit",
-  "pyarrow>=11.0.0",
+  "pyarrow",
   "pygeos",
+  "pyproj",
   "pytest",
   "requests",
   "rapidfuzz",
@@ -103,8 +106,8 @@ exclude = [
 line-length = 88
 indent-width = 4
 
-# Assume Python 3.11
-target-version = "py311"
+# Assume Python 3.10
+target-version = "py310"
 
 # Discover Jupyter Notebooks
 extend-include = ["*.ipynb"]

@@ -112,47 +112,49 @@ def extract_stumps(data, nest_numbers):
         stumps_nest = pd.DataFrame()
 
         for i in range(len(data)):
-            for j in range(len(diameter1_cols)):
-                Diam1 = pd.to_numeric(data.loc[i, diameter1_cols[j]], errors="coerce")
-                Diam2 = pd.to_numeric(data.loc[i, diameter2_cols[j]], errors="coerce")
-                height = pd.to_numeric(data.loc[i, height_cols[j]], errors="coerce")
-                slope = pd.to_numeric(data.loc[i, "slope/slope"], errors="coerce")
-                cut_cl = data.loc[i, stump_cut_cl_cols[j]]
-                hollow_go = data.loc[i, stump_hollow_go_cols[j]]
-                hollow_d1 = pd.to_numeric(
-                    data.loc[i, stump_hollow_d1_cols[j]], errors="coerce"
-                )
-                hollow_d2 = pd.to_numeric(
-                    data.loc[i, stump_hollow_d2_cols[j]], errors="coerce"
-                )
-                stump_density = pd.to_numeric(
-                    data.loc[i, stump_density_cols[j]], errors="coerce"
-                )
+            try:
+                for j in range(len(diameter1_cols)):
+                    Diam1 = pd.to_numeric(data.loc[i, diameter1_cols[j]], errors="coerce")
+                    Diam2 = pd.to_numeric(data.loc[i, diameter2_cols[j]], errors="coerce")
+                    height = pd.to_numeric(data.loc[i, height_cols[j]], errors="coerce")
+                    slope = pd.to_numeric(data.loc[i, "slope/slope"], errors="coerce")
+                    cut_cl = data.loc[i, stump_cut_cl_cols[j]]
+                    hollow_go = data.loc[i, stump_hollow_go_cols[j]]
+                    hollow_d1 = pd.to_numeric(
+                        data.loc[i, stump_hollow_d1_cols[j]], errors="coerce"
+                    )
+                    hollow_d2 = pd.to_numeric(
+                        data.loc[i, stump_hollow_d2_cols[j]], errors="coerce"
+                    )
+                    stump_density = pd.to_numeric(
+                        data.loc[i, stump_density_cols[j]], errors="coerce"
+                    )
 
-                if pd.isna(Diam1) or pd.isna(Diam2) or pd.isna(height):
-                    continue
+                    if pd.isna(Diam1) or pd.isna(Diam2) or pd.isna(height):
+                        continue
 
-                mean_Diam = np.mean([Diam1, Diam2])
-                # biomass_per_kg_tree = np.nan
+                    mean_Diam = np.mean([Diam1, Diam2])
+                    # biomass_per_kg_tree = np.nan
 
-                stump = pd.DataFrame(
-                    {
-                        "unique_id": [data.loc[i, "unique_id"]],
-                        "nest": [nest_number],
-                        "Diam1": [Diam1],
-                        "Diam2": [Diam2],
-                        "slope": [slope],
-                        "height": [height],
-                        # 'biomass_per_kg_tree': [biomass_per_kg_tree],
-                        "cut_cl": [cut_cl],
-                        "hollow_go": [hollow_go],
-                        "hollow_d1": [hollow_d1],
-                        "hollow_d2": [hollow_d2],
-                        "stump_density": [stump_density],
-                    }
-                )
-                stumps_nest = pd.concat([stumps_nest, stump], ignore_index=True)
-
+                    stump = pd.DataFrame(
+                        {
+                            "unique_id": [data.loc[i, "unique_id"]],
+                            "nest": [nest_number],
+                            "Diam1": [Diam1],
+                            "Diam2": [Diam2],
+                            "slope": [slope],
+                            "height": [height],
+                            # 'biomass_per_kg_tree': [biomass_per_kg_tree],
+                            "cut_cl": [cut_cl],
+                            "hollow_go": [hollow_go],
+                            "hollow_d1": [hollow_d1],
+                            "hollow_d2": [hollow_d2],
+                            "stump_density": [stump_density],
+                        }
+                    )
+                    stumps_nest = pd.concat([stumps_nest, stump], ignore_index=True)
+            except KeyError:
+                continue
         all_stumps = pd.concat([all_stumps, stumps_nest], ignore_index=True)
 
     return all_stumps
@@ -375,57 +377,59 @@ def extract_dead_trees_class2t(data, nest_numbers):
         slope_b_columns = [col for col in data.columns if slope_b_pattern.match(col)]
         dist_t_columns = [col for col in data.columns if dist_t_pattern.match(col)]
 
-        for i in range(len(data)):
-            # Check for missing 'unique_ID' or other critical fields before proceeding
-            if pd.isna(data.loc[i, "unique_id"]):
-                continue  # Skip this row if 'unique_ID' is missing
+        try:
+            for i in range(len(data)):
+                # Check for missing 'unique_ID' or other critical fields before proceeding
+                if pd.isna(data.loc[i, "unique_id"]):
+                    continue  # Skip this row if 'unique_ID' is missing
 
-            for j, species_name_col in enumerate(species_name_columns):
-                # Use a more robust check for missing values
-                if (
-                    pd.isna(data.loc[i, livedead_columns[j]])
-                    or pd.isna(data.loc[i, class_columns[j]])
-                    or pd.isna(data.loc[i, subclass_columns[j]])
-                ):
-                    continue  # Skip this iteration if critical values are missing
+                for j, species_name_col in enumerate(species_name_columns):
+                    # Use a more robust check for missing values
+                    if (
+                        pd.isna(data.loc[i, livedead_columns[j]])
+                        or pd.isna(data.loc[i, class_columns[j]])
+                        or pd.isna(data.loc[i, subclass_columns[j]])
+                    ):
+                        continue  # Skip this iteration if critical values are missing
 
-                if (
-                    data.loc[i, livedead_columns[j]] == 2
-                    and data.loc[i, class_columns[j]] == 2
-                    and data.loc[i, subclass_columns[j]] == 2
-                ):
-                    # Extract relevant data, handling missing values appropriately
-                    species_name = data.loc[i, species_name_columns[j]]
-                    family_name = data.loc[i, family_name_columns[j]]
-                    dbhtall = data.loc[i, dbhtall_columns[j]]
-                    dbtall = data.loc[i, dbtall_columns[j]]
-                    tall_density = data.loc[i, tall_density_columns[j]]
-                    slope_t = data.loc[i, slope_t_columns[j]]
-                    slope_b = data.loc[i, slope_b_columns[j]]
-                    dist_t = data.loc[i, dist_t_columns[j]]
+                    if (
+                        data.loc[i, livedead_columns[j]] == 2
+                        and data.loc[i, class_columns[j]] == 2
+                        and data.loc[i, subclass_columns[j]] == 2
+                    ):
+                        # Extract relevant data, handling missing values appropriately
+                        species_name = data.loc[i, species_name_columns[j]]
+                        family_name = data.loc[i, family_name_columns[j]]
+                        dbhtall = data.loc[i, dbhtall_columns[j]]
+                        dbtall = data.loc[i, dbtall_columns[j]]
+                        tall_density = data.loc[i, tall_density_columns[j]]
+                        slope_t = data.loc[i, slope_t_columns[j]]
+                        slope_b = data.loc[i, slope_b_columns[j]]
+                        dist_t = data.loc[i, dist_t_columns[j]]
 
-                    # Combine all data into a single row
-                    new_row = pd.DataFrame(
-                        {
-                            "unique_id": [data.loc[i, "unique_id"]],
-                            "nest": [nest_number],
-                            "species_name": [species_name],
-                            "family_name": [family_name],
-                            "dbh_tall": [dbhtall],
-                            "db_tall": [dbtall],
-                            "tall_density": [tall_density],
-                            "slope_t_tall": [slope_t],
-                            "slope_b_tall": [slope_b],
-                            "dist_t_tall": [dist_t],
-                            "class": [2],
-                        }
-                    )
+                        # Combine all data into a single row
+                        new_row = pd.DataFrame(
+                            {
+                                "unique_id": [data.loc[i, "unique_id"]],
+                                "nest": [nest_number],
+                                "species_name": [species_name],
+                                "family_name": [family_name],
+                                "dbh_tall": [dbhtall],
+                                "db_tall": [dbtall],
+                                "tall_density": [tall_density],
+                                "slope_t_tall": [slope_t],
+                                "slope_b_tall": [slope_b],
+                                "dist_t_tall": [dist_t],
+                                "class": [2],
+                            }
+                        )
 
-                    # Append the new row to the result data frame
-                    all_dead_trees = pd.concat(
-                        [all_dead_trees, new_row], ignore_index=True
-                    )
-
+                        # Append the new row to the result data frame
+                        all_dead_trees = pd.concat(
+                            [all_dead_trees, new_row], ignore_index=True
+                        )
+        except KeyError:
+            continue
     return all_dead_trees
 
 

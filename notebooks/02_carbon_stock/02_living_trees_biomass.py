@@ -5,7 +5,7 @@
 #       extension: .py
 #       format_name: percent
 #       format_version: '1.3'
-#       jupytext_version: 1.13.1
+#       jupytext_version: 1.16.0
 #   kernelspec:
 #     display_name: onebase
 #     language: python
@@ -17,15 +17,12 @@
 
 # %% [markdown]
 # # Imports and Set-up
-#
-# import os
 
 # %%
 # Standard Imports
 import sys
-
-import numpy as np
 import pandas as pd
+import numpy as np
 
 # Google Cloud Imports
 import pandas_gbq
@@ -33,29 +30,35 @@ import pandas_gbq
 # %%
 # Util imports
 sys.path.append("../../")  # include parent directory
-from src.biomass_equations import (
-    allometric_peatland_tree,
-    allometric_tropical_tree,
-    calculate_tree_height,
-    vmd0001_eq1,
-)
 from src.settings import (
+    GCP_PROJ_ID,
     CARBON_POOLS_OUTDIR,
     CARBON_STOCK_OUTDIR,
-    DATA_DIR,
-    GCP_PROJ_ID,
-    PC_PLOT_LOOKUP_CSV,
+    TMP_OUT_DIR,
     SPECIES_LOOKUP_CSV,
+    PC_PLOT_LOOKUP_CSV,
+)
+
+from src.biomass_equations import (
+    calculate_tree_height,
+    allometric_tropical_tree,
+    allometric_peatland_tree,
+    vmd0001_eq1,
+    vmd0001_eq2a,
+    vmd0001_eq2b,
+    vmd0001_eq5,
 )
 
 # %%
 # Variables
 TREES_CSV = CARBON_POOLS_OUTDIR / "trees.csv"
-TREES_WD_CSV = CARBON_POOLS_OUTDIR / "trees_with_wood_density.csv"
 SAPLING_CSV = CARBON_POOLS_OUTDIR / "saplings_ntv_litter.csv"
 PLOT_INFO_CSV = CARBON_POOLS_OUTDIR / "plot_info.csv"
+TREES_SPECIES_CSV = TMP_OUT_DIR / "trees_with_names.csv"
+TREES_WD_CSV = TMP_OUT_DIR / "trees_with_wood_density.csv"
 
 # BigQuery Variables
+SRC_DATASET_ID = "biomass_inventory"
 DATASET_ID = "carbon_stock"
 IF_EXISTS = "replace"
 
@@ -74,8 +77,8 @@ if PLOT_INFO_CSV.exists():
 else:
     query = f"""
     SELECT
-        *
-    FROM {GCP_PROJ_ID}.{DATASET_ID}.plot_info"""
+        * 
+    FROM {GCP_PROJ_ID}.{SRC_DATASET_ID}.plot_info"""
 
     # Read the BigQuery table into a dataframe
     plot_info = pandas_gbq.read_gbq(query, project_id=GCP_PROJ_ID)
@@ -83,6 +86,23 @@ else:
 
 # %%
 plot_info.info()
+
+# %%
+# get the slope adjusted area per nest per subplot and creaste dict for substitution
+plot_info_subset = plot_info[
+    [
+        "unique_id",
+        "corrected_plot_area_n2_m2",
+        "corrected_plot_area_n3_m2",
+        "corrected_plot_area_n4_m2",
+    ]
+].copy()
+plot_info_subset.dropna(inplace=True)
+plot_info_subset.drop_duplicates(subset=["unique_id"], inplace=True)
+plot_info_subset_dict = plot_info_subset.to_dict(orient="records")
+
+# %%
+plot_info_subset_dict[1]
 
 # %% [markdown]
 # ### Trees data
@@ -92,9 +112,9 @@ if TREES_CSV.exists():
     trees = pd.read_csv(TREES_CSV)
 else:
     query = f"""
-    SELECT
-        *
-    FROM {GCP_PROJ_ID}.{DATASET_ID}.trees"""
+    SELECT 
+        * 
+    FROM {GCP_PROJ_ID}.{SRC_DATASET_ID}.trees"""
 
     # Read the BigQuery table into a dataframe
     trees = pandas_gbq.read_gbq(query, project_id=GCP_PROJ_ID)
@@ -122,9 +142,9 @@ if SAPLING_CSV.exists():
     saplings = pd.read_csv(SAPLING_CSV)
 else:
     query = f"""
-    SELECT
-        *
-    FROM {GCP_PROJ_ID}.{DATASET_ID}.saplings_ntv_litter"""
+    SELECT 
+        * 
+    FROM {GCP_PROJ_ID}.{SRC_DATASET_ID}.saplings_ntv_litter"""
 
     # Read the BigQuery table into a dataframe
     saplings = pandas_gbq.read_gbq(query, project_id=GCP_PROJ_ID)
@@ -167,8 +187,10 @@ if OUTLIER_REMOVAL == "get_ave":
     trees.loc[trees["DBH"] >= 150, "DBH"] = trees.loc[
         trees["DBH"] >= 150, "unique_id"
     ].map(mean_dbh.set_index("unique_id")["DBH"])
+
 elif OUTLIER_REMOVAL == "drop_outliers":
     trees = trees[trees["DBH"] < 150].copy()
+
 elif OUTLIER_REMOVAL == "eq_150":
     trees.loc[trees["DBH"] >= 150, "DBH"] = 150
 
@@ -176,48 +198,54 @@ elif OUTLIER_REMOVAL == "eq_150":
 # ## Add species using lookup table
 
 # %%
-species_trees = trees.merge(species, on="code_species", how="left")
+species_dict = (
+    species[["scientific_name", "code_species"]]
+    .set_index("code_species")
+    .to_dict()["scientific_name"]
+)
 
 # %%
-# add species name based on lookup file
-trees["scientific_name"] = species_trees["scientific_name"]
-
-# add family name based on lookup file
-trees["family_name"] = species_trees["family"]
+trees["scientific_name"] = trees["code_species"].replace(species_dict)
 
 # %%
+# create lookup table for family name and code
 species_family = species[["code_family", "family"]].drop_duplicates()
 
 # %%
-family_trees = trees.merge(species_family, on="code_family", how="left")
+family_dict = species_family.set_index("code_family").to_dict()["family"]
 
 # %%
-trees.loc[(trees.code_family.notna()), "family_name"] = family_trees.loc[
-    (family_trees.code_family.notna()), "family"
-]
+trees["family_name"] = trees["code_family"].replace(family_dict)
 
 # %%
-trees.fillna({"scientific_name": "Unknown", "family_name": "Unknown"}, inplace=True)
+trees.head()
 
 # %%
-trees[(trees["scientific_name"] == "Unknown") & (trees["family_name"] == "Unknown")]
+trees[(trees.scientific_name.notnull()) & (trees.code_family.isnull())]
 
 # %%
-trees.to_csv(CARBON_POOLS_OUTDIR / "trees_with_names.csv", index=False)
+trees.info()
+
+# %%
+trees.to_csv(TREES_SPECIES_CSV, index=False)
 
 # %% [markdown]
 # ## Get genus and wood density using BIOMASS R library
 #
-# Wood density was generated using [BIOMASS](https://www.rdocumentation.org/packages/BIOMASS/versions/2.1.11) library from R. For further information,
-
-# %% [markdown]
-# [To do]: insert running r script to get wood density and genus using R
+# Wood density was generated using [BIOMASS](https://www.rdocumentation.org/packages/BIOMASS/versions/2.1.11) library from R. For further information, 
 
 # %%
-trees = pd.read_csv(CARBON_POOLS_OUTDIR / "trees_with_wood_density.csv")
+if not TREES_WD_CSV.exists():
+    # !Rscript {SRC_DIR}/get_wood_density.R {TREES_SPECIES_CSV} {TREES_WD_CSV}
+
+# %%
+trees = pd.read_csv(TREES_WD_CSV)
 
 # %%
 trees.head(2)
+
+# %%
+trees.info()
 
 # %% [markdown]
 # ## Estimate tree height
@@ -238,14 +266,22 @@ trees = trees.merge(plot_strata[["unique_id", "Strata"]], on="unique_id", how="l
 # %%
 trees.head(2)
 
+# %%
+trees.info()
+
 # %% [markdown]
-# ## Calculate biomass and carbon stock for tree AGB
+# ## Calculate biomass and carbon stock for tree AGB 
+
+# %%
+plot_strata.Strata.unique()
 
 # %%
 tropical_trees = trees.loc[trees["Strata"].isin([1, 2, 3])].copy()
 
 # %%
-tropical_trees = allometric_tropical_tree(tropical_trees, "meanWD", "DBH", "height")
+tropical_trees = allometric_tropical_tree(
+    tropical_trees, "wood_density", "DBH", "height"
+)
 
 # %%
 peatland_trees = trees.loc[trees["Strata"].isin([4, 5, 6])].copy()
@@ -257,44 +293,166 @@ peatland_trees = allometric_peatland_tree(peatland_trees, "DBH")
 trees = pd.concat([tropical_trees, peatland_trees])
 
 # %%
+trees.head()
+
+# %%
+trees["aboveground_biomass"] = trees["aboveground_biomass"] * 10
+
+# %%
+# trees["aboveground_biomass"] = trees["aboveground_biomass"]/1000
+
+# %%
 trees = vmd0001_eq1(trees, 0.47)
 
 # %%
 trees.head(2)
 
-
 # %% [markdown]
 # ## Calculate below ground biomass
 
+# %%
+trees = vmd0001_eq5(
+    trees,
+)
 
 # %%
-def vmd0001_eq5(
-    df: pd.DataFrame,
-    carbon_stock_col: str = "aboveground_carbon_stock",
-    eco_zone: str = "tropical_rainforest",
-):
-    if eco_zone == "tropical_rainforest" or eco_zone == "subtropical_humid":
-        df["below_ground_carbon_stock"] = np.where(
-            df[carbon_stock_col] < 125,
-            df[carbon_stock_col] * 0.20,
-            df[carbon_stock_col] * 0.24,
-        )
-    elif eco_zone == "subtropical_dry":
-        df["below_ground_carbon_stock"] = np.where(
-            df[carbon_stock_col] < 20,
-            df[carbon_stock_col] * 0.56,
-            df[carbon_stock_col] * 0.28,
-        )
-    else:
-        raise ValueError(
-            "Invalid eco_zone value. Please choose a valid eco_zone or add root-to-shoot ratio for the desired ecological zone."
-        )
+trees.head(2)
 
-    return df
+# %% [markdown]
+# ## Calculate biomass sum per plot
 
+# %% [markdown]
+# ### AGB
 
 # %%
-trees = vmd0001_eq5(trees)
+trees_agg_agb = vmd0001_eq2a(trees, ["unique_id", "nest"], "aboveground_carbon_tonnes")
+
+# %%
+# add the correct area using the unique_id and nest number
+trees_agg_agb["corrected_area_m2"] = trees_agg_agb.apply(
+    lambda x: next(
+        (
+            item["corrected_plot_area_n" + str(x["nest"]) + "_m2"]
+            for item in plot_info_subset_dict
+            if item["unique_id"] == x["unique_id"]
+        ),
+        None,
+    ),
+    axis=1,
+)
+
+# %%
+# trees_agg_agb["corrected_area_ha"] = trees_agg_agb["corrected_area_m2"] / 10_000
+
+# %%
+trees_agg_agb = vmd0001_eq2b(
+    trees_agg_agb, "aboveground_carbon_tonnes", "corrected_area_m2"
+)
+
+# %%
+trees_agg_agb.head()
+
+# %%
+trees_agg_agb["tC_per_ha"] = (
+    trees_agg_agb["aboveground_carbon_tonnes"] / trees_agg_agb["corrected_area_m2"]
+)
+
+# %%
+trees_agg_agb = (
+    trees_agg_agb.groupby("unique_id")[["CO2e_per_ha", "tC_per_ha"]]
+    .mean()
+    .reset_index()
+)
+
+# %%
+trees_agg_agb.rename(
+    columns={
+        "CO2e_per_ha": "aboveground_CO2e_per_ha",
+        "tC_per_ha": "aboveground_tC_per_ha",
+    },
+    inplace=True,
+)
+
+# %%
+trees_agg_agb.head()
+
+# %% [markdown]
+# ### BGB
+
+# %%
+trees_agg_bgb = vmd0001_eq2a(trees, ["unique_id", "nest"], "belowground_carbon_tonnes")
+
+# %%
+# add the correct area using the unique_id and nest number
+trees_agg_bgb["corrected_area_m2"] = trees_agg_bgb.apply(
+    lambda x: next(
+        (
+            item["corrected_plot_area_n" + str(x["nest"]) + "_m2"]
+            for item in plot_info_subset_dict
+            if item["unique_id"] == x["unique_id"]
+        ),
+        None,
+    ),
+    axis=1,
+)
+
+# %%
+trees_agg_bgb = vmd0001_eq2b(
+    trees_agg_bgb, "belowground_carbon_tonnes", "corrected_area_m2"
+)
+
+# %%
+trees_agg_bgb.head()
+
+# %%
+trees_agg_bgb["tC_per_ha"] = (
+    trees_agg_bgb["belowground_carbon_tonnes"] / trees_agg_bgb["corrected_area_m2"]
+)
+
+# %%
+trees_agg_bgb = (
+    trees_agg_bgb.groupby("unique_id")[["CO2e_per_ha", "tC_per_ha"]]
+    .mean()
+    .reset_index()
+)
+
+# %%
+trees_agg_bgb.rename(
+    columns={
+        "CO2e_per_ha": "belowground_CO2e_per_ha",
+        "tC_per_ha": "belowground_tC_per_ha",
+    },
+    inplace=True,
+)
+
+# %%
+trees_agg_bgb.head()
+
+# %%
+trees = trees_agg_agb.merge(trees_agg_bgb, on="unique_id", how="left")
+
+# %%
+trees.head()
+
+# %% [markdown]
+# ## Export data and Upload to BQ
+
+# %%
+trees.info()
+
+# %%
+# Upload to BQ
+if len(trees) != 0:
+    trees.to_csv(CARBON_STOCK_OUTDIR / "trees_carbon_stock.csv", index=False)
+    pandas_gbq.to_gbq(
+        trees,
+        f"{DATASET_ID}.trees_carbon_stock",
+        project_id=GCP_PROJ_ID,
+        if_exists=IF_EXISTS,
+        progress_bar=True,
+    )
+else:
+    raise ValueError("Dataframe is empty.")
 
 # %% [markdown]
 # # Calculate sapling biomass
@@ -308,6 +466,43 @@ corrected_radius = 2 / np.cos(plot_info["slope_radians"])
 
 # %%
 # Calculate new total subplot area based on corrected radius
-plot_info["corrected_sapling_area_m2"] = np.pi * corrected_radius * 2
+plot_info["corrected_sapling_area_m2"] = np.pi * corrected_radius**2
 
 # %%
+saplings = saplings.merge(
+    plot_info[["unique_id", "corrected_sapling_area_m2"]], on="unique_id"
+)
+
+# %%
+saplings = vmd0001_eq2b(saplings)
+
+# %%
+saplings.head()
+
+# %%
+saplings["saplings_tC_per_ha"] = (
+    saplings["aboveground_carbon_tonnes"] / saplings["corrected_sapling_area_m2"]
+)
+
+# %%
+saplings = saplings[["unique_id", "CO2e_per_ha", "saplings_tC_per_ha"]].copy()
+
+# %%
+saplings.rename(columns={"CO2e_per_ha": "sapling_CO2e_per_ha"}, inplace=True)
+
+# %%
+saplings.info()
+
+# %%
+# Upload to BQ
+if len(saplings) != 0:
+    saplings.to_csv(CARBON_STOCK_OUTDIR / "saplings_carbon_stock.csv", index=False)
+    pandas_gbq.to_gbq(
+        saplings,
+        f"{DATASET_ID}.saplings_carbon_stock",
+        project_id=GCP_PROJ_ID,
+        if_exists=IF_EXISTS,
+        progress_bar=True,
+    )
+else:
+    raise ValueError("Dataframe is empty.")

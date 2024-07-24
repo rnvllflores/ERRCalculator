@@ -5,7 +5,7 @@
 #       extension: .py
 #       format_name: percent
 #       format_version: '1.3'
-#       jupytext_version: 1.13.1
+#       jupytext_version: 1.16.0
 #   kernelspec:
 #     display_name: onebase
 #     language: python
@@ -20,19 +20,17 @@
 
 # %% [markdown]
 # # Imports and Set-up
-#
-# import os
-# import re
 
 # %%
 # Standard Imports
 import sys
 import urllib.request
+import pandas as pd
+import numpy as np
 from math import atan
 
-import matplotlib.pyplot as plt
-import numpy as np
-import pandas as pd
+# geospatial imports
+import geopandas as gpd
 
 # Google Cloud Imports
 import pandas_gbq
@@ -40,16 +38,16 @@ import pandas_gbq
 # %%
 # Util imports
 sys.path.append("../../")  # include parent directory
+from src.settings import DATA_DIR, GCP_PROJ_ID, CARBON_POOLS_OUTDIR
 from src.odk_data_parsing import (
+    extract_trees,
+    extract_stumps,
     extract_dead_trees_class1,
     extract_dead_trees_class2s,
     extract_dead_trees_class2t,
     extract_ldw_with_hollow,
     extract_ldw_wo_hollow,
-    extract_stumps,
-    extract_trees,
 )
-from src.settings import CARBON_POOLS_OUTDIR, DATA_DIR, GCP_PROJ_ID
 
 # %%
 # Variables
@@ -128,10 +126,11 @@ else:
 # ## Add a unique ID
 
 # %%
+plot_types = {"primary": 1, "backup": 2}
+
+# %%
 # Create a new column with "1" for Primary and "2" for Backup
-data["plot_type_short"] = data["plot_info/plot_type"].apply(
-    lambda x: "1" if x == "Primary" else "2"
-)
+data["plot_type_short"] = data["plot_info/plot_type"].replace(plot_types)
 
 # Extract subplot letters (assuming they are included in the 'plot_info.sub_plot' column)
 data["subplot_letter"] = data["plot_info/sub_plot"].str.replace("sub_plot", "")
@@ -140,8 +139,96 @@ data["subplot_letter"] = data["plot_info/sub_plot"].str.replace("sub_plot", "")
 data["unique_id"] = (
     data["plot_info/plot_code_nmbr"].astype(str)
     + data["subplot_letter"]
-    + data["plot_type_short"]
+    + data["plot_type_short"].astype(str)
 )
+
+# %% [markdown]
+# ## Check for duplicate plot IDs
+
+# %%
+data[
+    data.unique_id.isin(
+        data.loc[data.duplicated(subset="unique_id"), "unique_id"].unique()
+    )
+].sort_values("unique_id")
+
+# %% [markdown]
+# ### Assign corrected plot IDs to each duplicate
+# The subset of duplicates were manually inspected to correct the issue. The common source of the duplicates were typo errors in the plot ID or sublot letter, there were other instances that abandoned subplots persisted in the dataset
+
+# %%
+# load dataframe with manually annotated plot id corrections
+plot_id_corrections = gpd.read_file(
+    DATA_DIR / "gpkg" / "duplicate_plots_corrected.gpkg"
+)
+
+# %%
+plot_id_corrections.head(2)
+
+# %% vscode={"languageId": "markdown"}
+# Drop rows where the geometry is empty, this indicates that these plots were abandoned
+plot_id_corrections = plot_id_corrections[~plot_id_corrections.geometry.is_empty].copy()
+
+# %%
+plot_id_corrections = plot_id_corrections[
+    plot_id_corrections["unique_id_updated"] != "flag"
+]
+
+# %%
+plot_id_corrections.shape
+
+# %%
+# create a uuid to match duplicates from the original data
+plot_id_corrections["uuid"] = (
+    plot_id_corrections["unique_id"]
+    + plot_id_corrections["slope"].astype(str)
+    + plot_id_corrections["team_no"].astype(str)
+)
+
+# %%
+plot_id_corrections.uuid.nunique()
+
+# %%
+# define a dictionary to map the updated unique_id to the uuid
+uuid_dict = (
+    plot_id_corrections[["unique_id_updated", "uuid"]]
+    .set_index("uuid")
+    .to_dict()["unique_id_updated"]
+)
+
+# %%
+uuid_dict
+
+# %%
+data["uuid"] = (
+    data["unique_id"]
+    + data["slope/slope"].astype(str)
+    + data["plot_info/team_no"].astype(str)
+)
+
+# %%
+data["unique_id_updated"] = data["uuid"].map(uuid_dict).fillna(np.nan)
+
+# %%
+# update the unique_id where it is necessary
+data["unique_id"] = data["unique_id_updated"].fillna(data["unique_id"])
+
+# %%
+# check for remaining duplicates
+duplicates = data[
+    data.unique_id.isin(
+        data.loc[data.duplicated(subset="unique_id"), "unique_id"].unique()
+    )
+].sort_values("unique_id")
+
+# %%
+# these are duplicate entries where both abandoned and active plots
+# are present, drop those without an updated unique_id
+duplicates
+
+# %%
+# save uuid to a list, do not drop here yet since it appears that these rows contain data
+duplicates_drop = duplicates.loc[duplicates["unique_id_updated"].isna(), "uuid"]
 
 # %% [markdown]
 # # Extract Plot info
@@ -180,6 +267,7 @@ plot_info_cols = [
     "slope/slope",
     "canopy/avg_height",
     "canopy/can_cov",
+    "uuid",
 ]
 
 # %%
@@ -223,6 +311,14 @@ plot_info_cols = {
 
 # %%
 plot_info.rename(columns=plot_info_cols, inplace=True)
+
+# %%
+# drop duplicate plot id here since remaining duplicates
+# have empty geometry
+plot_info = plot_info[~plot_info["uuid"].isin(duplicates_drop)].copy()
+
+# %%
+plot_info.drop(columns=["uuid"], inplace=True)
 
 # %% [markdown]
 # ### Set correct data types
@@ -317,11 +413,15 @@ plot_info["slope_radians"] = plot_info["slope"].apply(lambda x: atan(x / 100))
 
 # %%
 # Calculate corrected radius based on slope (in radians)
-corrected_radius = 20 / np.cos(plot_info["slope_radians"])
+corrected_radius_n2 = 5 / np.cos(plot_info["slope_radians"])
+corrected_radius_n3 = 15 / np.cos(plot_info["slope_radians"])
+corrected_radius_n4 = 20 / np.cos(plot_info["slope_radians"])
 
 # %%
 # Calculate new total subplot area based on corrected radius
-plot_info["corrected_plot_area_m2"] = np.pi * corrected_radius * 20
+plot_info["corrected_plot_area_n2_m2"] = np.pi * corrected_radius_n2**2
+plot_info["corrected_plot_area_n3_m2"] = np.pi * corrected_radius_n3**2
+plot_info["corrected_plot_area_n4_m2"] = np.pi * corrected_radius_n4**2
 
 # %%
 plot_info.info(), plot_info.head(2)
@@ -457,25 +557,15 @@ pandas_gbq.to_gbq(
 dead_trees_c1 = extract_dead_trees_class1(data, NESTS)
 
 # %%
+if not dead_trees_c1.empty:
+    dead_trees_c1["class"] = 1
+    dead_trees_c1["subclass"] = np.nan
+
+# %%
 dead_trees_c1.info(), dead_trees_c1.head(2)
 
 # %%
 dead_trees_c1.describe()
-
-# %% [markdown]
-# ## Export data and upload to BQ
-
-# %%
-dead_trees_c1.to_csv(CARBON_POOLS_OUTDIR / "dead_trees_class1.csv", index=False)
-
-# %%
-# Upload to BQ
-pandas_gbq.to_gbq(
-    dead_trees_c1,
-    f"{DATASET_ID}.dead_trees_c1",
-    project_id=GCP_PROJ_ID,
-    if_exists=IF_EXISTS,
-)
 
 # %% [markdown]
 # # Dead Trees: Class 2 - short
@@ -486,26 +576,15 @@ dead_trees_c2s = extract_dead_trees_class2s(data, NESTS)
 # %%
 dead_trees_c2s.info(), dead_trees_c2s.head(2)
 
-# %% [markdown]
-# ## Export data and upload to BQ
-
 # %%
-# Export CSV
-if len(dead_trees_c2s) != 0:
-    dead_trees_c2s.to_csv(CARBON_POOLS_OUTDIR / "dead_trees_class2.csv", index=False)
-
-# %%
-# Upload to BQ
-if len(dead_trees_c2s) != 0:
-    pandas_gbq.to_gbq(
-        dead_trees_c2s,
-        f"{DATASET_ID}.dead_trees_c2s",
-        project_id=GCP_PROJ_ID,
-        if_exists=IF_EXISTS,
-    )
+if not dead_trees_c2s.empty:
+    dead_trees_c2s["class"] = 2
+    dead_trees_c2s["subclass"] = "short"
 
 # %% [markdown]
 # # Dead Trees: Class 2 - Tall
+
+# %%
 
 # %%
 dead_trees_c2t = extract_dead_trees_class2t(data, NESTS)
@@ -513,22 +592,34 @@ dead_trees_c2t = extract_dead_trees_class2t(data, NESTS)
 # %%
 dead_trees_c2t.info(), dead_trees_c2t.head(2)
 
+# %%
+if not dead_trees_c2t.empty:
+    dead_trees_c2t["class"] = 2
+    dead_trees_c2t["subclass"] = "tall"
+
+# %% [markdown]
+# # Combine into one table
+
+# %%
+dead_trees = pd.concat([dead_trees_c1, dead_trees_c2s, dead_trees_c2t])
+
+# %%
+dead_trees.info(), dead_trees.head(2)
+
 # %% [markdown]
 # ## Export data and upload to BQ
 
 # %%
 # Export CSV
-if len(dead_trees_c2t) != 0:
-    dead_trees_c2t.to_csv(
-        CARBON_POOLS_OUTDIR / "dead_trees_class2_tall.csv", index=False
-    )
+if len(dead_trees) != 0:
+    dead_trees.to_csv(CARBON_POOLS_OUTDIR / "dead_trees.csv", index=False)
 
 # %%
 # Upload to BQ
-if len(dead_trees_c2t) != 0:
+if len(dead_trees) != 0:
     pandas_gbq.to_gbq(
-        dead_trees_c2t,
-        f"{DATASET_ID}.dead_trees_c2t",
+        dead_trees,
+        f"{DATASET_ID}.dead_trees",
         project_id=GCP_PROJ_ID,
         if_exists=IF_EXISTS,
     )

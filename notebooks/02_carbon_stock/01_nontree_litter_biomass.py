@@ -5,7 +5,7 @@
 #       extension: .py
 #       format_name: percent
 #       format_version: '1.3'
-#       jupytext_version: 1.13.1
+#       jupytext_version: 1.16.0
 #   kernelspec:
 #     display_name: onebase
 #     language: python
@@ -17,14 +17,10 @@
 
 # %% [markdown]
 # # Imports and Set-up
-#
-# import os
 
 # %%
 # Standard Imports
 import sys
-
-import numpy as np
 import pandas as pd
 
 # Google Cloud Imports
@@ -33,8 +29,9 @@ import pandas_gbq
 # %%
 # Util imports
 sys.path.append("../../")  # include parent directory
+from src.settings import GCP_PROJ_ID, CARBON_POOLS_OUTDIR, CARBON_STOCK_OUTDIR
+
 from src.biomass_equations import vmd0003_eq1
-from src.settings import CARBON_POOLS_OUTDIR, CARBON_STOCK_OUTDIR, DATA_DIR, GCP_PROJ_ID
 
 # %%
 # Variables
@@ -42,6 +39,7 @@ NTV_LITTER_CSV = CARBON_POOLS_OUTDIR / "saplings_ntv_litter.csv"
 PLOT_INFO_CSV = CARBON_POOLS_OUTDIR / "plot_info.csv"
 
 # BigQuery Variables
+SRC_DATASET_ID = "biomass_inventory"
 DATASET_ID = "carbon_stock"
 IF_EXISTS = "replace"
 
@@ -54,8 +52,8 @@ if PLOT_INFO_CSV.exists():
 else:
     query = f"""
     SELECT
-        *
-    FROM {GCP_PROJ_ID}.{DATASET_ID}.plot_info"""
+        * 
+    FROM {GCP_PROJ_ID}.{SRC_DATASET_ID}.plot_info"""
 
     # Read the BigQuery table into a dataframe
     plot_info = pandas_gbq.read_gbq(query, project_id=GCP_PROJ_ID)
@@ -69,9 +67,9 @@ if NTV_LITTER_CSV.exists():
     ntv_litter = pd.read_csv(NTV_LITTER_CSV)
 else:
     query = f"""
-    SELECT
-        *
-    FROM {GCP_PROJ_ID}.{DATASET_ID}.saplings_ntv_litter"""
+    SELECT 
+        * 
+    FROM {GCP_PROJ_ID}.{SRC_DATASET_ID}.saplings_ntv_litter"""
 
     # Read the BigQuery table into a dataframe
     ntv_litter = pandas_gbq.read_gbq(query, project_id=GCP_PROJ_ID)
@@ -84,26 +82,31 @@ ntv_litter.info()
 # # Calculate carbon stock for litter
 
 # %%
-# get weight of bag contents
+# get weight of bag contents - convert grams to kg
 ntv_litter["litter_biomass_kg"] = (
     ntv_litter.ntv_sample_weight - ntv_litter.ntv_bag_weight
 ) / 1000
 
 # %%
 litter = ntv_litter[["unique_id", "litter_biomass_kg"]].copy()
+
+# %%
 litter = vmd0003_eq1(litter, "litter_biomass_kg", 0.15, 0.37)
 
 # %%
 litter.rename(
     columns={
-        "carbon_stock": "litter_carbon_stock",
-        "dry_biomass": "litter_dry_biomass",
+        "CO2e_per_ha": "litter_CO2e_per_ha",
+        "kg_dry_matter": "litter_kg_dry_matter",
     },
     inplace=True,
 )
 
 # %%
-litter.info(), litter.head(2)
+litter.head(2)
+
+# %%
+litter.info()
 
 # %% [markdown]
 # ## Export data and upload to BQ
@@ -117,8 +120,8 @@ if len(litter) != 0:
 table_schema = [
     {"name": "unique_id", "type": "STRING"},
     {"name": "litter_biomass_kg", "type": "FLOAT64"},
-    {"name": "litter_dry_biomass", "type": "FLOAT64"},
-    {"name": "litter_carbon_stock", "type": "FLOAT64"},
+    {"name": "litter_kg_dry_matter", "type": "FLOAT64"},
+    {"name": "litter_CO2e_per_ha", "type": "FLOAT64"},
 ]
 if len(litter) != 0:
     pandas_gbq.to_gbq(
@@ -133,6 +136,7 @@ if len(litter) != 0:
 # # Calculate carbon stock for non-tree vegetation
 
 # %%
+# get weight of bag contents - convert grams to kg
 ntv_litter["ntv_biomass_kg"] = (
     ntv_litter.ntv_sample_weight - ntv_litter.litter_bag_weight
 ) / 1000
@@ -142,10 +146,19 @@ ntv = ntv_litter[["unique_id", "ntv_biomass_kg"]].copy()
 ntv = vmd0003_eq1(ntv, "ntv_biomass_kg", 0.15, 0.47)
 
 # %%
-ntv.info(), ntv.head(2)
+ntv.rename(
+    columns={
+        "CO2e_per_ha": "ntv_CO2e_per_ha",
+        "kg_dry_matter": "ntv_kg_dry_matter",
+    },
+    inplace=True,
+)
 
 # %%
-ntv.rename(columns={"carbon_stock": "ntv_carbon_stock"}, inplace=True)
+ntv.head(2)
+
+# %%
+ntv.info()
 
 # %%
 ntv.to_csv(CARBON_STOCK_OUTDIR / "ntv_carbon_stock.csv", index=False)
