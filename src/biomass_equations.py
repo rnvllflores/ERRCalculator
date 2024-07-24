@@ -61,7 +61,7 @@ def allometric_tropical_tree(df, wooddensity_col, dbh_col, height_col):
     """
 
     df = df.copy()
-    df["aboveground_biomass"] = 10 * (
+    df["aboveground_biomass"] = (
         0.0673 * ((df[wooddensity_col] * df[height_col] * df[dbh_col] ** 2) ** 0.976)
     )
 
@@ -93,7 +93,7 @@ def allometric_peatland_tree(df, dbh_col):
 
     """
     df = df.copy()
-    df["aboveground_biomass"] = 10 * (
+    df["aboveground_biomass"] = (
         21.297 - 67.953 * df[dbh_col] + 0.74 * df[dbh_col] ** 2
     )
     return df

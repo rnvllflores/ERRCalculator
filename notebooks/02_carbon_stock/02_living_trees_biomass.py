@@ -296,6 +296,9 @@ trees = pd.concat([tropical_trees, peatland_trees])
 trees.head()
 
 # %%
+trees["aboveground_biomass"] = trees["aboveground_biomass"] * 10
+
+# %%
 # trees["aboveground_biomass"] = trees["aboveground_biomass"]/1000
 
 # %%
