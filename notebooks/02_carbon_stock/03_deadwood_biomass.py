@@ -71,9 +71,6 @@ SRC_DATASET_ID = "biomass_inventory"
 DATASET_ID = "carbon_stock"
 IF_EXISTS = "replace"
 
-# Processing Conditions
-OUTLIER_REMOVAL = "get_ave"  # Options: "get_ave", "drop_outliers", "eq_150"
-
 # %% [markdown]
 # ## Load data
 
