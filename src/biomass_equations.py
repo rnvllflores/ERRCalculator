@@ -61,9 +61,9 @@ def allometric_tropical_tree(df, wooddensity_col, dbh_col, height_col):
     """
 
     df = df.copy()
-    df["aboveground_biomass"] = (
+    df["aboveground_biomass"] = 10 * (
         0.0673 * ((df[wooddensity_col] * df[height_col] * df[dbh_col] ** 2) ** 0.976)
-    )/1000
+    )
 
     return df
 
@@ -93,9 +93,9 @@ def allometric_peatland_tree(df, dbh_col):
 
     """
     df = df.copy()
-    df["aboveground_biomass"] = (
+    df["aboveground_biomass"] = 10 * (
         21.297 - 67.953 * df[dbh_col] + 0.74 * df[dbh_col] ** 2
-    )/1000
+    )
     return df
 
 def get_solid_diamter(df: pd.DataFrame, 
@@ -156,8 +156,17 @@ def vmd0001_eq1(
 
     return df
 
+def vmd0001_eq2a(df:pd.DataFrame, 
+                 agg_cols:list, 
+                 tc_col:str):
+    subset = agg_cols.copy()
+    subset.extend([tc_col])
+    df = df[subset].copy()
+    df = df.groupby(agg_cols).sum().reset_index()
 
-def vmd0001_eq2(
+    return df
+
+def vmd0001_eq2b(
     df: pd.DataFrame,
     biomass_col: str = "aboveground_carbon_tonnes",
     area_col: str = "corrected_sapling_area_m2",
@@ -199,7 +208,7 @@ def vmd0001_eq5(
     """
     df = df.copy()
 
-    df["below_ground_carbon_tonnes"] = df[carbon_stock_col] * 0.36
+    df["belowground_carbon_tonnes"] = df[carbon_stock_col] * 0.36
 
     return df
 
