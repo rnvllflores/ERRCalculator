@@ -443,10 +443,10 @@ trees.info()
 # %%
 # Upload to BQ
 if len(trees) != 0:
-    trees.to_csv(CARBON_STOCK_OUTDIR / "trees_CO2e_per_ha.csv", index=False)
+    trees.to_csv(CARBON_STOCK_OUTDIR / "trees_carbon_stock.csv", index=False)
     pandas_gbq.to_gbq(
         trees,
-        f"{DATASET_ID}.trees_carbon_tonnes",
+        f"{DATASET_ID}.trees_carbon_stock",
         project_id=GCP_PROJ_ID,
         if_exists=IF_EXISTS,
         progress_bar=True,
