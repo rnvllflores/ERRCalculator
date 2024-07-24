@@ -82,26 +82,31 @@ ntv_litter.info()
 # # Calculate carbon stock for litter
 
 # %%
-# get weight of bag contents
+# get weight of bag contents - convert grams to kg
 ntv_litter["litter_biomass_kg"] = (
     ntv_litter.ntv_sample_weight - ntv_litter.ntv_bag_weight
 ) / 1000
 
 # %%
 litter = ntv_litter[["unique_id", "litter_biomass_kg"]].copy()
+
+# %%
 litter = vmd0003_eq1(litter, "litter_biomass_kg", 0.15, 0.37)
 
 # %%
 litter.rename(
     columns={
         "CO2e_per_ha": "litter_CO2e_per_ha",
-        "dry_biomass": "litter_dry_biomass",
+        "kg_dry_matter": "litter_kg_dry_matter",
     },
     inplace=True,
 )
 
 # %%
-litter.info(), litter.head(2)
+litter.head(2)
+
+# %%
+litter.info()
 
 # %% [markdown]
 # ## Export data and upload to BQ
@@ -115,8 +120,8 @@ if len(litter) != 0:
 table_schema = [
     {"name": "unique_id", "type": "STRING"},
     {"name": "litter_biomass_kg", "type": "FLOAT64"},
-    {"name": "litter_dry_biomass", "type": "FLOAT64"},
-    {"name": "litter_carbon_stock", "type": "FLOAT64"},
+    {"name": "litter_kg_dry_matter", "type": "FLOAT64"},
+    {"name": "litter_CO2e_per_ha", "type": "FLOAT64"},
 ]
 if len(litter) != 0:
     pandas_gbq.to_gbq(
@@ -131,6 +136,7 @@ if len(litter) != 0:
 # # Calculate carbon stock for non-tree vegetation
 
 # %%
+# get weight of bag contents - convert grams to kg
 ntv_litter["ntv_biomass_kg"] = (
     ntv_litter.ntv_sample_weight - ntv_litter.litter_bag_weight
 ) / 1000
@@ -143,13 +149,16 @@ ntv = vmd0003_eq1(ntv, "ntv_biomass_kg", 0.15, 0.47)
 ntv.rename(
     columns={
         "CO2e_per_ha": "ntv_CO2e_per_ha",
-        "dry_biomass": "ntv_dry_biomass",
+        "kg_dry_matter": "ntv_kg_dry_matter",
     },
     inplace=True,
 )
 
 # %%
-ntv.info(), ntv.head(2)
+ntv.head(2)
+
+# %%
+ntv.info()
 
 # %%
 ntv.to_csv(CARBON_STOCK_OUTDIR / "ntv_carbon_stock.csv", index=False)
