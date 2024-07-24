@@ -277,13 +277,27 @@ def vmd0002_eq8b(df: pd.DataFrame,
     subset.extend([tdm_col])
 
     df = df[subset]
-    df = df.groupby(agg_col).sum()
+    df = df.groupby(agg_col).sum().reset_index()
 
     return df
 
+def vmd0002_eq9(df_stumps: pd.DataFrame, 
+                df_ldw: pd.DataFrame, 
+                df_sdw: pd.DataFrame,
+                tdm_pattern: str = "tonnes_dry_matter_ha",
+                carbon_fraction: float = 0.47):
+    df = pd.merge(df_stumps, df_ldw, on="unique_id", how="outer")
+    df = pd.merge(df, df_sdw, on="unique_id", how="outer")
+
+    df['all_tonnes_dry_matter_ha'] = df.filter(like=tdm_pattern).sum(axis=1)
+    df['tC_per_ha'] = df['all_tonnes_dry_matter_ha'] * carbon_fraction
+    df['CO2e_per_ha'] = (df['all_tonnes_dry_matter_ha'] * carbon_fraction)* 44/12
+    
+    return df
+
 def vmd0003_eq1(
-    data: pd.DataFrame,
-    col_name: str,
+    df: pd.DataFrame,
+    kdm_col: str,
     water_content: float,
     carbon_fraction: float = 0.37,
 ):
@@ -308,11 +322,11 @@ def vmd0003_eq1(
     df = df.copy()
 
     # remove water content
-    data.loc[:, "dry_biomass"] = data[col_name] * water_content
+    df["kg_dry_matter"] = df[kdm_col] * water_content
 
     # calculate carbon stock
-    data.loc[:, "CO2e_per_ha"] = (
-        (10 / 0.25) * data["dry_biomass"] * carbon_fraction * 44 / 12
+    df["CO2e_per_ha"] = (
+        (10 / 0.25) * df["kg_dry_matter"] * carbon_fraction * 44 / 12
     )
 
-    return data
+    return df
