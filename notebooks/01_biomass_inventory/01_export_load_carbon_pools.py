@@ -197,9 +197,6 @@ uuid_dict = (
 )
 
 # %%
-uuid_dict
-
-# %%
 data["uuid"] = (
     data["unique_id"]
     + data["slope/slope"].astype(str)
