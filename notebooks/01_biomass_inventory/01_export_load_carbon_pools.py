@@ -451,13 +451,15 @@ if len(plot_info) != 0:
 # # Saplings, Non tree vegetation and litter
 
 # %%
-cols = plot_info_cols = [
+cols = [
     "unique_id",
     "sapling_data/count_saplings",
     "ntv_data/litter_data/litter_bag_weight",
     "ntv_data/litter_data/litter_sample_weight",
     "ntv_data/ntv_bag_weight",
     "ntv_data/ntv_sample_weight",
+    "slope/slope",
+    "plot_info/team_no",
 ]
 
 # %%
@@ -475,6 +477,27 @@ ntv = data[cols].copy()
 
 # %%
 ntv.rename(columns=col_names, inplace=True)
+
+# %% [markdown]
+# ## remove duplicates
+
+# %%
+ntv["uuid"] = (
+    ntv["unique_id"]
+    + ntv["slope/slope"].astype(str)
+    + ntv["plot_info/team_no"].astype(str)
+)
+
+# %%
+# drop duplicate plot id here since remaining duplicates
+# have empty geometry
+ntv = ntv[~ntv["uuid"].isin(duplicates_drop)].copy()
+
+# %%
+ntv[ntv.duplicated(subset="unique_id")]
+
+# %%
+ntv.drop(columns=["uuid", "slope/slope", "plot_info/team_no"], inplace=True)
 
 # %%
 ntv.info(), ntv.head(2)
