@@ -322,14 +322,21 @@ results_df[
     ]
 ]
 
-# %%
-data["Strata"].groupby(data["Strata"]).count()
+# %% [markdown]
+# ## Export data and Upload to BQ
 
 # %%
-results_df.groupby("Strata")["weighted_mean"].sum()
-
-# %%
-1156.68 + 277.45 + 24.14 + 3.91 + 1.63
-
-# %%
-678.09 + 162.54 + 24.29 + 3.79 + 1.86
+# Upload to BQ
+if len(results_df) != 0:
+    results_df.to_csv(
+        CARBON_STOCK_OUTDIR / f"strata_emission_factors_{VERSION}.csv", index=False
+    )
+    pandas_gbq.to_gbq(
+        results_df,
+        f"{DATASET_ID}.strata_emission_factors_{VERSION}",
+        project_id=GCP_PROJ_ID,
+        if_exists=IF_EXISTS,
+        progress_bar=True,
+    )
+else:
+    raise ValueError("Dataframe is empty.")
