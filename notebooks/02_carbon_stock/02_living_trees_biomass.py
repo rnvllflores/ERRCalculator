@@ -183,10 +183,12 @@ plot_strata.info()
 
 # %%
 if OUTLIER_REMOVAL == "get_ave":
-    mean_dbh = pd.DataFrame(trees.groupby("unique_id")["DBH"].mean()).reset_index()
+    mean_dbh = pd.DataFrame(
+        trees.groupby(["unique_id", "nest"])["DBH"].mean()
+    ).reset_index()
     trees.loc[trees["DBH"] >= 150, "DBH"] = trees.loc[
         trees["DBH"] >= 150, "unique_id"
-    ].map(mean_dbh.set_index("unique_id")["DBH"])
+    ].map(mean_dbh.set_index(["unique_id", "nest"])["DBH"])
 
 elif OUTLIER_REMOVAL == "drop_outliers":
     trees = trees[trees["DBH"] < 150].copy()
@@ -296,10 +298,8 @@ trees = pd.concat([tropical_trees, peatland_trees])
 trees.head()
 
 # %%
-trees["aboveground_biomass"] = trees["aboveground_biomass"] * 10
-
-# %%
-# trees["aboveground_biomass"] = trees["aboveground_biomass"]/1000
+# convert aboveground biomass to tonnes
+trees["aboveground_biomass"] = trees["aboveground_biomass"] / 1000
 
 # %%
 trees = vmd0001_eq1(trees, 0.47)
@@ -342,20 +342,22 @@ trees_agg_agb["corrected_area_m2"] = trees_agg_agb.apply(
 )
 
 # %%
-# trees_agg_agb["corrected_area_ha"] = trees_agg_agb["corrected_area_m2"] / 10_000
-
-# %%
 trees_agg_agb = vmd0001_eq2b(
     trees_agg_agb, "aboveground_carbon_tonnes", "corrected_area_m2"
 )
 
 # %%
+# convert tonnes/sqm to tonnes/ha
+trees_agg_agb["CO2e_per_ha"] = trees_agg_agb["CO2e_per_ha"] * 10_000
+
+# %%
 trees_agg_agb.head()
 
 # %%
+# calculate tonnes of Carbon per sqm; convert tonnes/sqm to tonnes/ha
 trees_agg_agb["tC_per_ha"] = (
     trees_agg_agb["aboveground_carbon_tonnes"] / trees_agg_agb["corrected_area_m2"]
-)
+) * 10_000
 
 # %%
 trees_agg_agb = (
@@ -402,12 +404,17 @@ trees_agg_bgb = vmd0001_eq2b(
 )
 
 # %%
+# convert tonnes/sqm to tonnes/ha
+trees_agg_bgb["CO2e_per_ha"] = trees_agg_bgb["CO2e_per_ha"] * 10_000
+
+# %%
 trees_agg_bgb.head()
 
 # %%
+# calculate tonnes of Carbon per sqm; convert tonnes/sqm to tonnes/ha
 trees_agg_bgb["tC_per_ha"] = (
     trees_agg_bgb["belowground_carbon_tonnes"] / trees_agg_bgb["corrected_area_m2"]
-)
+) * 10_000
 
 # %%
 trees_agg_bgb = (
