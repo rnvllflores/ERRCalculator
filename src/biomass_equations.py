@@ -1,5 +1,7 @@
 import numpy as np
 import pandas as pd
+from scipy.stats import t
+from scipy.stats import norm
 
 
 # height model
@@ -120,6 +122,79 @@ def get_solid_diamter(df: pd.DataFrame,
     df['solid_diameter'] = np.sqrt((solid_area/np.pi))*2
 
     return df
+
+# Draft that uses t-distribution
+def calculate_statistics(df, column, confidence=0.95):
+    # Calculate weighted mean
+    weights = df['subplot_count']
+    weighted_mean = np.average(df[column], weights=weights)
+    
+    # Calculate variance and standard deviation
+    variance = np.average((df[column] - weighted_mean)**2, weights=weights)
+    weighted_std = np.sqrt(variance)
+    
+    # Calculate the total number of subplots
+    total_subplots = weights.sum()
+    
+    # Calculate standard error
+    standard_error = weighted_std / np.sqrt(total_subplots)
+    
+    # Determine the critical value (z or t-score)
+    df_deg_of_freedom = total_subplots - 1
+    critical_value = t.ppf((1 + confidence) / 2., df_deg_of_freedom) # Use t-distribution
+    
+    # Calculate margin of error
+    margin_of_error = critical_value * standard_error
+    
+    # Calculate confidence interval
+    confidence_interval = (weighted_mean - margin_of_error, weighted_mean + margin_of_error)
+    
+    return {
+        'weighted_mean': weighted_mean,
+        'weighted_std': weighted_std,
+        'standard_error': standard_error,
+        'margin_of_error': margin_of_error,
+        'confidence_interval_lower': confidence_interval[0],
+        'confidence_interval_upper': confidence_interval[1]
+    }
+
+def calculate_statistics(df, column, confidence=0.95):
+    # Calculate weighted mean
+    weights = df['subplot_count']
+    weighted_mean = np.average(df[column], weights=weights)
+    
+    # Calculate variance and standard deviation
+    variance = np.average((df[column] - weighted_mean)**2, weights=weights)
+    weighted_std = np.sqrt(variance)
+    
+    # Calculate the total number of subplots
+    total_subplots = weights.sum()
+    
+    # Calculate standard error
+    standard_error = weighted_std / np.sqrt(total_subplots)
+    se_perc_mean = ((weighted_std / np.sqrt(total_subplots)) / weighted_mean) * 100
+
+    # Calculate confidence intervals
+    ci_val = norm.ppf(.95) * standard_error
+    
+    # Calculate margin of error
+    margin_of_error_per_90 = (ci_val / weighted_mean) * 100
+    margin_of_error_per_95 = ((norm.ppf(.975) * standard_error) / weighted_mean) * 100
+    
+    # Calculate confidence interval
+    confidence_interval = (weighted_mean - ci_val, weighted_mean + ci_val)
+    
+    return {
+        'weighted_mean': weighted_mean,
+        'confidence_interval_lower': confidence_interval[0],
+        'confidence_interval_upper': confidence_interval[1],
+        'uncertainty_90': margin_of_error_per_90,
+        'uncertainty_95': margin_of_error_per_95,
+        'margin_of_error': ci_val,
+        'weighted_std': weighted_std,
+        'standard_error': standard_error,
+        'standard_error_perc_mean': se_perc_mean,
+    }
 
 def vmd0001_eq1(
     df: pd.DataFrame,
