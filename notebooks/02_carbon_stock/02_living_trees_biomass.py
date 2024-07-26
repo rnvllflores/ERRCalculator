@@ -440,20 +440,6 @@ trees.head()
 # %%
 trees.info()
 
-# %%
-# Upload to BQ
-if len(trees) != 0:
-    trees.to_csv(CARBON_STOCK_OUTDIR / "trees_carbon_stock.csv", index=False)
-    pandas_gbq.to_gbq(
-        trees,
-        f"{DATASET_ID}.trees_carbon_stock",
-        project_id=GCP_PROJ_ID,
-        if_exists=IF_EXISTS,
-        progress_bar=True,
-    )
-else:
-    raise ValueError("Dataframe is empty.")
-
 # %% [markdown]
 # # Calculate sapling biomass
 
@@ -493,13 +479,27 @@ saplings.rename(columns={"CO2e_per_ha": "sapling_CO2e_per_ha"}, inplace=True)
 # %%
 saplings.info()
 
+# %% [markdown]
+# # Add saplings to aboveground biomass
+
+# %%
+trees = trees.merge(saplings, on="unique_id", how="left")
+
+# %%
+trees.info()
+
+# %%
+trees["total_aboveground_CO2e_per_ha"] = (
+    trees["aboveground_CO2e_per_ha"] + trees["sapling_CO2e_per_ha"]
+)
+
 # %%
 # Upload to BQ
-if len(saplings) != 0:
-    saplings.to_csv(CARBON_STOCK_OUTDIR / "saplings_carbon_stock.csv", index=False)
+if len(trees) != 0:
+    trees.to_csv(CARBON_STOCK_OUTDIR / "trees_carbon_stock.csv", index=False)
     pandas_gbq.to_gbq(
-        saplings,
-        f"{DATASET_ID}.saplings_carbon_stock",
+        trees,
+        f"{DATASET_ID}.trees_carbon_stock",
         project_id=GCP_PROJ_ID,
         if_exists=IF_EXISTS,
         progress_bar=True,
