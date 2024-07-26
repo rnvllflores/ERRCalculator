@@ -56,7 +56,7 @@ def allometric_tropical_tree(df, wooddensity_col, dbh_col, height_col):
 
     Formula:
     The aboveground biomass is calculated using the following equation:
-    aboveground_biomass = 10 * (0.0673 * ((wood density * height * dbh** 2) ** 0.976)). The factor 10 is used to convert the biomass from kg to metric tons.
+    aboveground_biomass = (0.0673 * ((wood density * height * dbh** 2) ** 0.976)). The factor 10 is used to convert the biomass from kg to metric tons.
 
     Returns:
     pandas.DataFrame: The input dataframe with an additional column 'aboveground_biomass' representing the calculated aboveground biomass in tons.
@@ -73,7 +73,7 @@ def allometric_tropical_tree(df, wooddensity_col, dbh_col, height_col):
 def allometric_peatland_tree(df, dbh_col):
     """
     Calculates the aboveground biomass of trees in a peatland using allometric equation based on Alibo, et al. (2012) which assumes
-    10 * (21.297 - (6.53 * DBH) + (0.74 * DBH^2)). The output is divided by 1000 to convert from kg to metric tonnes.
+    (21.297 - (67.953 * DBH) + (0.74 * DBH^2)). The output is divided by 1000 to convert from kg to metric tonnes.
 
     References:
     Alibo, L.B. & Lasco, Rodel. (2012). Carbon Storage of Caimpugan Peatland in Agusan Marsh, Philippines and its Role in Greenhouse Gas Mitigation. Journal of Environmental Science and Management. 15. 50-58.
@@ -91,7 +91,7 @@ def allometric_peatland_tree(df, dbh_col):
 
     Formula:
     The aboveground biomass is calculated using the following equation:
-    aboveground_biomass = 10 * (21.297 - (6.53 * trees[dbh_col]) + (0.74 * trees[dbh_col]**2)) The factor 10 is used to convert the biomass from kg to metric tons.
+    aboveground_biomass = (21.297 - (67.953 * trees[dbh_col]) + (0.74 * trees[dbh_col]**2)) The factor 10 is used to convert the biomass from kg to metric tons.
 
     """
     df = df.copy()
@@ -231,9 +231,19 @@ def vmd0001_eq1(
 
     return df
 
-def vmd0001_eq2a(df:pd.DataFrame, 
-                 agg_cols:list, 
-                 tc_col:str):
+def vmd0001_eq2a(df: pd.DataFrame, agg_cols: list, tc_col: str):
+    """
+    Perform aggregation and summation on a calculated biomass based on specified columns.
+
+    Parameters:
+    df (pd.DataFrame): The input DataFrame.
+    agg_cols (list): A list of columns to group by and aggregate.
+    tc_col (str): The column containing the values to be summed.
+
+    Returns:
+    pd.DataFrame: The resulting DataFrame after aggregation and summation.
+    """
+
     subset = agg_cols.copy()
     subset.extend([tc_col])
     df = df[subset].copy()
