@@ -439,10 +439,7 @@ trees_agg_bgb.head()
 trees = trees_agg_agb.merge(trees_agg_bgb, on="unique_id", how="left")
 
 # %%
-trees.head()
-
-# %% [markdown]
-# ## Export data and Upload to BQ
+trees.head(2)
 
 # %%
 trees.info()
@@ -470,18 +467,26 @@ saplings = saplings.merge(
 saplings = vmd0001_eq2b(saplings)
 
 # %%
+# convert tonnes/sqm to tonnes/ha
+saplings["CO2e_per_ha"] = saplings["CO2e_per_ha"] * 10_000
+
+# %%
 saplings.head()
 
 # %%
+# calculate tonnes of Carbon per sqm; convert tonnes/sqm to tonnes/ha
 saplings["saplings_tC_per_ha"] = (
     saplings["aboveground_carbon_tonnes"] / saplings["corrected_sapling_area_m2"]
-)
+) * 10_000
 
 # %%
 saplings = saplings[["unique_id", "CO2e_per_ha", "saplings_tC_per_ha"]].copy()
 
 # %%
 saplings.rename(columns={"CO2e_per_ha": "sapling_CO2e_per_ha"}, inplace=True)
+
+# %%
+saplings
 
 # %%
 saplings.info()
