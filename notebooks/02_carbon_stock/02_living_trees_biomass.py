@@ -183,10 +183,12 @@ plot_strata.info()
 
 # %%
 if OUTLIER_REMOVAL == "get_ave":
-    mean_dbh = pd.DataFrame(trees.groupby("unique_id")["DBH"].mean()).reset_index()
+    mean_dbh = pd.DataFrame(
+        trees.groupby(["unique_id", "nest"])["DBH"].mean()
+    ).reset_index()
     trees.loc[trees["DBH"] >= 150, "DBH"] = trees.loc[
         trees["DBH"] >= 150, "unique_id"
-    ].map(mean_dbh.set_index("unique_id")["DBH"])
+    ].map(mean_dbh.set_index(["unique_id", "nest"])["DBH"])
 
 elif OUTLIER_REMOVAL == "drop_outliers":
     trees = trees[trees["DBH"] < 150].copy()
@@ -296,10 +298,8 @@ trees = pd.concat([tropical_trees, peatland_trees])
 trees.head()
 
 # %%
-trees["aboveground_biomass"] = trees["aboveground_biomass"] * 10
-
-# %%
-# trees["aboveground_biomass"] = trees["aboveground_biomass"]/1000
+# convert aboveground biomass to tonnes
+trees["aboveground_biomass"] = trees["aboveground_biomass"] / 1000
 
 # %%
 trees = vmd0001_eq1(trees, 0.47)
@@ -342,20 +342,22 @@ trees_agg_agb["corrected_area_m2"] = trees_agg_agb.apply(
 )
 
 # %%
-# trees_agg_agb["corrected_area_ha"] = trees_agg_agb["corrected_area_m2"] / 10_000
-
-# %%
 trees_agg_agb = vmd0001_eq2b(
     trees_agg_agb, "aboveground_carbon_tonnes", "corrected_area_m2"
 )
 
 # %%
+# convert tonnes/sqm to tonnes/ha
+trees_agg_agb["CO2e_per_ha"] = trees_agg_agb["CO2e_per_ha"] * 10_000
+
+# %%
 trees_agg_agb.head()
 
 # %%
+# calculate tonnes of Carbon per sqm; convert tonnes/sqm to tonnes/ha
 trees_agg_agb["tC_per_ha"] = (
     trees_agg_agb["aboveground_carbon_tonnes"] / trees_agg_agb["corrected_area_m2"]
-)
+) * 10_000
 
 # %%
 trees_agg_agb = (
@@ -402,12 +404,17 @@ trees_agg_bgb = vmd0001_eq2b(
 )
 
 # %%
+# convert tonnes/sqm to tonnes/ha
+trees_agg_bgb["CO2e_per_ha"] = trees_agg_bgb["CO2e_per_ha"] * 10_000
+
+# %%
 trees_agg_bgb.head()
 
 # %%
+# calculate tonnes of Carbon per sqm; convert tonnes/sqm to tonnes/ha
 trees_agg_bgb["tC_per_ha"] = (
     trees_agg_bgb["belowground_carbon_tonnes"] / trees_agg_bgb["corrected_area_m2"]
-)
+) * 10_000
 
 # %%
 trees_agg_bgb = (
@@ -432,27 +439,10 @@ trees_agg_bgb.head()
 trees = trees_agg_agb.merge(trees_agg_bgb, on="unique_id", how="left")
 
 # %%
-trees.head()
-
-# %% [markdown]
-# ## Export data and Upload to BQ
+trees.head(2)
 
 # %%
 trees.info()
-
-# %%
-# Upload to BQ
-if len(trees) != 0:
-    trees.to_csv(CARBON_STOCK_OUTDIR / "trees_carbon_stock.csv", index=False)
-    pandas_gbq.to_gbq(
-        trees,
-        f"{DATASET_ID}.trees_carbon_stock",
-        project_id=GCP_PROJ_ID,
-        if_exists=IF_EXISTS,
-        progress_bar=True,
-    )
-else:
-    raise ValueError("Dataframe is empty.")
 
 # %% [markdown]
 # # Calculate sapling biomass
@@ -477,12 +467,17 @@ saplings = saplings.merge(
 saplings = vmd0001_eq2b(saplings)
 
 # %%
+# convert tonnes/sqm to tonnes/ha
+saplings["CO2e_per_ha"] = saplings["CO2e_per_ha"] * 10_000
+
+# %%
 saplings.head()
 
 # %%
+# calculate tonnes of Carbon per sqm; convert tonnes/sqm to tonnes/ha
 saplings["saplings_tC_per_ha"] = (
     saplings["aboveground_carbon_tonnes"] / saplings["corrected_sapling_area_m2"]
-)
+) * 10_000
 
 # %%
 saplings = saplings[["unique_id", "CO2e_per_ha", "saplings_tC_per_ha"]].copy()
@@ -491,15 +486,32 @@ saplings = saplings[["unique_id", "CO2e_per_ha", "saplings_tC_per_ha"]].copy()
 saplings.rename(columns={"CO2e_per_ha": "sapling_CO2e_per_ha"}, inplace=True)
 
 # %%
+saplings
+
+# %%
 saplings.info()
+
+# %% [markdown]
+# # Add saplings to aboveground biomass
+
+# %%
+trees = trees.merge(saplings, on="unique_id", how="left")
+
+# %%
+trees.info()
+
+# %%
+trees["total_aboveground_CO2e_per_ha"] = (
+    trees["aboveground_CO2e_per_ha"] + trees["sapling_CO2e_per_ha"]
+)
 
 # %%
 # Upload to BQ
-if len(saplings) != 0:
-    saplings.to_csv(CARBON_STOCK_OUTDIR / "saplings_carbon_stock.csv", index=False)
+if len(trees) != 0:
+    trees.to_csv(CARBON_STOCK_OUTDIR / "trees_carbon_stock.csv", index=False)
     pandas_gbq.to_gbq(
-        saplings,
-        f"{DATASET_ID}.saplings_carbon_stock",
+        trees,
+        f"{DATASET_ID}.trees_carbon_stock",
         project_id=GCP_PROJ_ID,
         if_exists=IF_EXISTS,
         progress_bar=True,

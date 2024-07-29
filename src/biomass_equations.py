@@ -1,5 +1,7 @@
 import numpy as np
 import pandas as pd
+from scipy.stats import t
+from scipy.stats import norm
 
 
 # height model
@@ -54,7 +56,7 @@ def allometric_tropical_tree(df, wooddensity_col, dbh_col, height_col):
 
     Formula:
     The aboveground biomass is calculated using the following equation:
-    aboveground_biomass = 10 * (0.0673 * ((wood density * height * dbh** 2) ** 0.976)). The factor 10 is used to convert the biomass from kg to metric tons.
+    aboveground_biomass = (0.0673 * ((wood density * height * dbh** 2) ** 0.976)). The factor 10 is used to convert the biomass from kg to metric tons.
 
     Returns:
     pandas.DataFrame: The input dataframe with an additional column 'aboveground_biomass' representing the calculated aboveground biomass in tons.
@@ -71,7 +73,7 @@ def allometric_tropical_tree(df, wooddensity_col, dbh_col, height_col):
 def allometric_peatland_tree(df, dbh_col):
     """
     Calculates the aboveground biomass of trees in a peatland using allometric equation based on Alibo, et al. (2012) which assumes
-    10 * (21.297 - (6.53 * DBH) + (0.74 * DBH^2)). The output is divided by 1000 to convert from kg to metric tonnes.
+    (21.297 - (67.953 * DBH) + (0.74 * DBH^2)). The output is divided by 1000 to convert from kg to metric tonnes.
 
     References:
     Alibo, L.B. & Lasco, Rodel. (2012). Carbon Storage of Caimpugan Peatland in Agusan Marsh, Philippines and its Role in Greenhouse Gas Mitigation. Journal of Environmental Science and Management. 15. 50-58.
@@ -89,7 +91,7 @@ def allometric_peatland_tree(df, dbh_col):
 
     Formula:
     The aboveground biomass is calculated using the following equation:
-    aboveground_biomass = 10 * (21.297 - (6.53 * trees[dbh_col]) + (0.74 * trees[dbh_col]**2)) The factor 10 is used to convert the biomass from kg to metric tons.
+    aboveground_biomass = (21.297 - (67.953 * trees[dbh_col]) + (0.74 * trees[dbh_col]**2)) The factor 10 is used to convert the biomass from kg to metric tons.
 
     """
     df = df.copy()
@@ -121,13 +123,86 @@ def get_solid_diamter(df: pd.DataFrame,
 
     return df
 
+# Draft that uses t-distribution
+def calculate_statistics(df, column, confidence=0.95):
+    # Calculate weighted mean
+    weights = df['subplot_count']
+    weighted_mean = np.average(df[column], weights=weights)
+    
+    # Calculate variance and standard deviation
+    variance = np.average((df[column] - weighted_mean)**2, weights=weights)
+    weighted_std = np.sqrt(variance)
+    
+    # Calculate the total number of subplots
+    total_subplots = weights.sum()
+    
+    # Calculate standard error
+    standard_error = weighted_std / np.sqrt(total_subplots)
+    
+    # Determine the critical value (z or t-score)
+    df_deg_of_freedom = total_subplots - 1
+    critical_value = t.ppf((1 + confidence) / 2., df_deg_of_freedom) # Use t-distribution
+    
+    # Calculate margin of error
+    margin_of_error = critical_value * standard_error
+    
+    # Calculate confidence interval
+    confidence_interval = (weighted_mean - margin_of_error, weighted_mean + margin_of_error)
+    
+    return {
+        'weighted_mean': weighted_mean,
+        'weighted_std': weighted_std,
+        'standard_error': standard_error,
+        'margin_of_error': margin_of_error,
+        'confidence_interval_lower': confidence_interval[0],
+        'confidence_interval_upper': confidence_interval[1]
+    }
+
+def calculate_statistics(df, column, confidence=0.95):
+    # Calculate weighted mean
+    weights = df['subplot_count']
+    weighted_mean = np.average(df[column], weights=weights)
+    
+    # Calculate variance and standard deviation
+    variance = np.average((df[column] - weighted_mean)**2, weights=weights)
+    weighted_std = np.sqrt(variance)
+    
+    # Calculate the total number of subplots
+    total_subplots = weights.sum()
+    
+    # Calculate standard error
+    standard_error = weighted_std / np.sqrt(total_subplots)
+    se_perc_mean = ((weighted_std / np.sqrt(total_subplots)) / weighted_mean) * 100
+
+    # Calculate confidence intervals
+    ci_val = norm.ppf(.95) * standard_error
+    
+    # Calculate margin of error
+    margin_of_error_per_90 = (ci_val / weighted_mean) * 100
+    margin_of_error_per_95 = ((norm.ppf(.975) * standard_error) / weighted_mean) * 100
+    
+    # Calculate confidence interval
+    confidence_interval = (weighted_mean - ci_val, weighted_mean + ci_val)
+    
+    return {
+        'weighted_mean': weighted_mean,
+        'confidence_interval_lower': confidence_interval[0],
+        'confidence_interval_upper': confidence_interval[1],
+        'uncertainty_90': margin_of_error_per_90,
+        'uncertainty_95': margin_of_error_per_95,
+        'margin_of_error': ci_val,
+        'weighted_std': weighted_std,
+        'standard_error': standard_error,
+        'standard_error_perc_mean': se_perc_mean,
+    }
+
 def vmd0001_eq1(
     df: pd.DataFrame,
     carbon_fraction: float = 0.47,
     is_sapling: bool = False,
     sapling_cnt: str = "count_saplings",
     wc: float = 0.25,
-    avg_weight: float = 184,
+    avg_weight: float = 0.000184,
 ):
     """
     Calculate the carbon stock based on the aboveground biomass and carbon fraction.
@@ -138,7 +213,7 @@ def vmd0001_eq1(
     - is_sapling (bool, optional): Flag indicating if the calculation is for saplings. Default value is False.
     - sapling_cnt (str, optional): The column name in the DataFrame representing the count of saplings. Default value is 'count_saplings'.
     - wc (float, optional): The wood carbon content. Default value is 0.25.
-    - avg_weight (float, optional): The average weight of the saplings. Default value is 184.
+    - avg_weight (float, optional): The average weight of the saplings. Default value is 0.000184 tonnes.
 
     Returns:
     - DataFrame: The input data with additional columns for carbon stock.
@@ -156,9 +231,19 @@ def vmd0001_eq1(
 
     return df
 
-def vmd0001_eq2a(df:pd.DataFrame, 
-                 agg_cols:list, 
-                 tc_col:str):
+def vmd0001_eq2a(df: pd.DataFrame, agg_cols: list, tc_col: str):
+    """
+    Perform aggregation and summation on a calculated biomass based on specified columns.
+
+    Parameters:
+    df (pd.DataFrame): The input DataFrame.
+    agg_cols (list): A list of columns to group by and aggregate.
+    tc_col (str): The column containing the values to be summed.
+
+    Returns:
+    pd.DataFrame: The resulting DataFrame after aggregation and summation.
+    """
+
     subset = agg_cols.copy()
     subset.extend([tc_col])
     df = df[subset].copy()
