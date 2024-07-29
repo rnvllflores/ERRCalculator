@@ -202,7 +202,7 @@ def vmd0001_eq1(
     is_sapling: bool = False,
     sapling_cnt: str = "count_saplings",
     wc: float = 0.25,
-    avg_weight: float = 184,
+    avg_weight: float = 0.000184,
 ):
     """
     Calculate the carbon stock based on the aboveground biomass and carbon fraction.
@@ -213,7 +213,7 @@ def vmd0001_eq1(
     - is_sapling (bool, optional): Flag indicating if the calculation is for saplings. Default value is False.
     - sapling_cnt (str, optional): The column name in the DataFrame representing the count of saplings. Default value is 'count_saplings'.
     - wc (float, optional): The wood carbon content. Default value is 0.25.
-    - avg_weight (float, optional): The average weight of the saplings. Default value is 184.
+    - avg_weight (float, optional): The average weight of the saplings. Default value is 0.000184 tonnes.
 
     Returns:
     - DataFrame: The input data with additional columns for carbon stock.
