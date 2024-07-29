@@ -322,6 +322,9 @@ results_df[
     ]
 ]
 
+# %%
+results_df.groupby("Strata")["weighted_mean"].sum()
+
 # %% [markdown]
 # ## Export data and Upload to BQ
 
