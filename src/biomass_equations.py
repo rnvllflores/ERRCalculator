@@ -276,6 +276,7 @@ def vmd0001_eq2b(
 def vmd0001_eq5(
     df: pd.DataFrame,
     carbon_stock_col: str = "aboveground_carbon_tonnes",
+    root_shoot_ratio: float = 0.36
 ) -> pd.DataFrame:
     """
     Calculate the belowground carbon stock based on the aboveground carbon stock and eco zone.
@@ -283,8 +284,9 @@ def vmd0001_eq5(
     Parameters:
     - df (pd.DataFrame): The input DataFrame containing the aboveground carbon stock.
     - carbon_stock_col (str, optional): The column name of the aboveground carbon stock data. Default value is "aboveground_carbon_tonnes".
-    - eco_zone (str, optional): The ecological zone. Default value is "tropical_rainforest".
-
+    - root_shoot_ration (float, optional): Ratio of below-ground biomass to above-ground biomass; applies to above-ground biomass, above-ground
+biomass growth, biomass removals and may differ for these components. Uses 0.36 as default for tropical rainforests
+    
     Returns:
     - DataFrame: The input data with an additional column for belowground carbon stock.
     
@@ -293,7 +295,7 @@ def vmd0001_eq5(
     """
     df = df.copy()
 
-    df["belowground_carbon_tonnes"] = df[carbon_stock_col] * 0.36
+    df["belowground_carbon_tonnes"] = df[carbon_stock_col] * root_shoot_ratio
 
     return df
 
