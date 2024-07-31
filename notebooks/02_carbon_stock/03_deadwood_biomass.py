@@ -228,13 +228,17 @@ density_val = {1: 0.54, 2: 0.35, 3: 0.21}
 stumps["stump_density_val"] = stumps["stump_density"].replace(density_val).fillna(0.21)
 
 # %%
+# convert height from cm to m
+stumps["height_m"] = stumps["height"] / 100
+
+# %%
 # Get biomass for each stump
-stumps = vmd0002_eq2(stumps, "Diam1", "Diam2", "height", "stump_density_val")
+stumps = vmd0002_eq2(stumps, "Diam1", "Diam2", "height_m", "stump_density_val")
 
 # %%
 # Get biomass of each stump that is hollow
 stumps_hollow = vmd0002_eq2(
-    stumps, "hollow_d1", "hollow_d2", "height", "stump_density_val"
+    stumps, "hollow_d1", "hollow_d2", "height_m", "stump_density_val"
 )
 
 # %%
@@ -249,6 +253,9 @@ stumps["tonnes_dry_matter"] = np.where(
     stumps["tonnes_dry_matter"] - stumps["tonnes_dry_matter_hollow"],
     stumps["tonnes_dry_matter"],
 )
+
+# %%
+stumps.describe()
 
 # %%
 # Remove biomass_hollow column to avoid confusion
@@ -415,6 +422,19 @@ c1_dead_trees = pd.read_csv(tmp_dead_trees_c1_wd)
 
 # %%
 c1_dead_trees
+
+# %%
+c1_dead_trees["wood_density"] = np.nan
+
+# %%
+c1_dead_trees.loc[c1_dead_trees.scientific_name == "Hopea plagata", "wood_density"] = (
+    0.64
+)
+
+# %%
+c1_dead_trees.loc[
+    c1_dead_trees.scientific_name == "Flueggea flexuosa", "wood_density"
+] = 0.64
 
 # %%
 c1_dead_trees = calculate_tree_height(c1_dead_trees, "DBH_cl1")
