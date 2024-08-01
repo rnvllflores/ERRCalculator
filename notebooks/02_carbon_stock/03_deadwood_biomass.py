@@ -411,6 +411,10 @@ c1_dead_trees.to_csv(tmp_dead_trees_c1)
 # %%
 c1_dead_trees
 
+# %%
+# temporary fix: manually add the wood density
+c1_dead_trees["wood_density"] = 0.64
+
 # %% [markdown]
 # ### Get genus and wood density using BIOMASS R Library
 
@@ -418,23 +422,14 @@ c1_dead_trees
 # !Rscript $SRC_DIR"/get_wood_density.R" $tmp_dead_trees_c1 $tmp_dead_trees_c1_wd
 
 # %%
-c1_dead_trees = pd.read_csv(tmp_dead_trees_c1_wd)
+if tmp_dead_trees_c1_wd.exists():
+    c1_dead_trees = pd.read_csv(tmp_dead_trees_c1_wd)
 
 # %%
 c1_dead_trees
 
 # %%
 c1_dead_trees["wood_density"] = np.nan
-
-# %%
-c1_dead_trees.loc[c1_dead_trees.scientific_name == "Hopea plagata", "wood_density"] = (
-    0.64
-)
-
-# %%
-c1_dead_trees.loc[
-    c1_dead_trees.scientific_name == "Flueggea flexuosa", "wood_density"
-] = 0.64
 
 # %%
 c1_dead_trees = calculate_tree_height(c1_dead_trees, "DBH_cl1")
@@ -466,7 +461,8 @@ c1_dead_trees_peatland = allometric_peatland_tree(c1_dead_trees_peatland, "DBH_c
 c1_dead_trees = pd.concat([c1_dead_trees_tropical, c1_dead_trees_peatland])
 
 # %%
-c1_dead_trees.drop(columns=["X"], inplace=True)
+if "X" in c1_dead_trees.columns:
+    c1_dead_trees.drop(columns=["X"], inplace=True)
 
 # %%
 c1_dead_trees
