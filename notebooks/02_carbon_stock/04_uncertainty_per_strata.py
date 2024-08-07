@@ -266,6 +266,9 @@ data.rename(
 data.head(2)
 
 # %%
+plot_count = data.groupby("Strata")["plot_code_nmbr"].count().reset_index()
+
+# %%
 columns = [
     "belowground_CO2e_per_ha",
     "aboveground_CO2e_per_ha",
@@ -322,11 +325,55 @@ results_df[
     ]
 ]
 
-# %%
-results_df.groupby("Strata")["weighted_mean"].sum()
+# %% [markdown]
+# ## Get confidence by Strata
 
 # %%
-results_df.info()
+columns = [
+    "belowground_CO2e_per_ha",
+    "aboveground_CO2e_per_ha",
+    "deadwood_CO2e_per_ha",
+    "ntv_CO2e_per_ha",
+    "litter_CO2e_per_ha",
+]
+data["all_CO2e_per_ha"] = data[columns].sum(axis=1)
+
+# %%
+strata_list = []
+
+for strata, group in data.groupby("Strata"):
+    stats = calculate_statistics(group, "all_CO2e_per_ha")
+    stats["Strata"] = strata
+    stats["tCO2e_per_ha"] = column.split("_")[0]
+    strata_list.append(stats)
+
+strata_df = pd.DataFrame(strata_list)
+
+# Reordering columns for better readability
+strata_df = strata_df[
+    [
+        "Strata",
+        "tCO2e_per_ha",
+        "weighted_mean",
+        "confidence_interval_lower",
+        "confidence_interval_upper",
+        "uncertainty_90",
+        "uncertainty_95",
+        "margin_of_error",
+        "weighted_std",
+        "standard_error",
+        "standard_error_perc_mean",
+    ]
+]
+
+# %%
+strata_df
+
+# %%
+strata_df = strata_df.merge(plot_count)
+
+# %%
+strata_df.info()
 
 # %% [markdown]
 # ## Export data and Upload to BQ

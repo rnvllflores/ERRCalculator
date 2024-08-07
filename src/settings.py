@@ -24,7 +24,7 @@ CARBON_STOCK_OUTDIR = CSV_DATA_DIR / "carbon_stock"
 
 # lookup tables
 SPECIES_LOOKUP_CSV = SRC_DIR / "lookup" / "species_lookup.csv"
-PC_PLOT_LOOKUP_CSV = SRC_DIR / "lookup" / "pc_plot_lookup_20240722.csv"
+PC_PLOT_LOOKUP_CSV = SRC_DIR / "lookup" / "pc_plot_lookup_20240802.csv"
 
 for data_dir in [CSV_DATA_DIR, CARBON_POOLS_OUTDIR, CARBON_STOCK_OUTDIR, GEOJSON_DATA_DIR, GPKG_DATA_DIR, PARQUET_DATA_DIR, SHP_DATA_DIR, TMP_OUT_DIR]:
     data_dir.mkdir(exist_ok=True)

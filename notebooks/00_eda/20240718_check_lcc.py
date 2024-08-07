@@ -121,7 +121,7 @@ gdf["diff"] = gdf["area_sqm"] - gdf["area_buffered"]
 # %%
 gdf["diff"].describe()
 
-# %% vscode={"languageId": "julia"}
+# %%
 from shapely import Polygon
 import geopandas as gpd
 

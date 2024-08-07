@@ -124,39 +124,39 @@ def get_solid_diamter(df: pd.DataFrame,
     return df
 
 # Draft that uses t-distribution
-def calculate_statistics(df, column, confidence=0.95):
-    # Calculate weighted mean
-    weights = df['subplot_count']
-    weighted_mean = np.average(df[column], weights=weights)
+# def calculate_statistics(df, column, confidence=0.95):
+#     # Calculate weighted mean
+#     weights = df['subplot_count']
+#     weighted_mean = np.average(df[column], weights=weights)
     
-    # Calculate variance and standard deviation
-    variance = np.average((df[column] - weighted_mean)**2, weights=weights)
-    weighted_std = np.sqrt(variance)
+#     # Calculate variance and standard deviation
+#     variance = np.average((df[column] - weighted_mean)**2, weights=weights)
+#     weighted_std = np.sqrt(variance)
     
-    # Calculate the total number of subplots
-    total_subplots = weights.sum()
+#     # Calculate the total number of subplots
+#     total_subplots = weights.sum()
     
-    # Calculate standard error
-    standard_error = weighted_std / np.sqrt(total_subplots)
+#     # Calculate standard error
+#     standard_error = weighted_std / np.sqrt(total_subplots)
     
-    # Determine the critical value (z or t-score)
-    df_deg_of_freedom = total_subplots - 1
-    critical_value = t.ppf((1 + confidence) / 2., df_deg_of_freedom) # Use t-distribution
+#     # Determine the critical value (z or t-score)
+#     df_deg_of_freedom = total_subplots - 1
+#     critical_value = t.ppf((1 + confidence) / 2., df_deg_of_freedom) # Use t-distribution
     
-    # Calculate margin of error
-    margin_of_error = critical_value * standard_error
+#     # Calculate margin of error
+#     margin_of_error = critical_value * standard_error
     
-    # Calculate confidence interval
-    confidence_interval = (weighted_mean - margin_of_error, weighted_mean + margin_of_error)
+#     # Calculate confidence interval
+#     confidence_interval = (weighted_mean - margin_of_error, weighted_mean + margin_of_error)
     
-    return {
-        'weighted_mean': weighted_mean,
-        'weighted_std': weighted_std,
-        'standard_error': standard_error,
-        'margin_of_error': margin_of_error,
-        'confidence_interval_lower': confidence_interval[0],
-        'confidence_interval_upper': confidence_interval[1]
-    }
+#     return {
+#         'weighted_mean': weighted_mean,
+#         'weighted_std': weighted_std,
+#         'standard_error': standard_error,
+#         'margin_of_error': margin_of_error,
+#         'confidence_interval_lower': confidence_interval[0],
+#         'confidence_interval_upper': confidence_interval[1]
+#     }
 
 def calculate_statistics(df, column, confidence=0.95):
     # Calculate weighted mean

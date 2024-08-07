@@ -18,6 +18,7 @@ dependencies = [
   "dbt-postgres",
   "dbt-duckdb",
   "duckdb",
+  "exactextract",
   "earthengine-api",
   "fiona",
   "folium",
