@@ -14,6 +14,10 @@ GCP_PROJ_ID = "clearwind"  # Replace with project ID
 
 # data subdirectories
 CSV_DATA_DIR = DATA_DIR / "csv"
+GEOJSON_DATA_DIR = DATA_DIR / "geojson"
+GPKG_DATA_DIR = DATA_DIR / "gpkg"
+PARQUET_DATA_DIR = DATA_DIR / "parquet"
+SHP_DATA_DIR = DATA_DIR / "shp"
 TMP_OUT_DIR = DATA_DIR / "tmp"
 CARBON_POOLS_OUTDIR = CSV_DATA_DIR / "biomass_inventory"
 CARBON_STOCK_OUTDIR = CSV_DATA_DIR / "carbon_stock"
