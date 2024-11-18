@@ -124,39 +124,39 @@ def get_solid_diamter(df: pd.DataFrame,
     return df
 
 # Draft that uses t-distribution
-def calculate_statistics(df, column, confidence=0.95):
-    # Calculate weighted mean
-    weights = df['subplot_count']
-    weighted_mean = np.average(df[column], weights=weights)
+# def calculate_statistics(df, column, confidence=0.95):
+#     # Calculate weighted mean
+#     weights = df['subplot_count']
+#     weighted_mean = np.average(df[column], weights=weights)
     
-    # Calculate variance and standard deviation
-    variance = np.average((df[column] - weighted_mean)**2, weights=weights)
-    weighted_std = np.sqrt(variance)
+#     # Calculate variance and standard deviation
+#     variance = np.average((df[column] - weighted_mean)**2, weights=weights)
+#     weighted_std = np.sqrt(variance)
     
-    # Calculate the total number of subplots
-    total_subplots = weights.sum()
+#     # Calculate the total number of subplots
+#     total_subplots = weights.sum()
     
-    # Calculate standard error
-    standard_error = weighted_std / np.sqrt(total_subplots)
+#     # Calculate standard error
+#     standard_error = weighted_std / np.sqrt(total_subplots)
     
-    # Determine the critical value (z or t-score)
-    df_deg_of_freedom = total_subplots - 1
-    critical_value = t.ppf((1 + confidence) / 2., df_deg_of_freedom) # Use t-distribution
+#     # Determine the critical value (z or t-score)
+#     df_deg_of_freedom = total_subplots - 1
+#     critical_value = t.ppf((1 + confidence) / 2., df_deg_of_freedom) # Use t-distribution
     
-    # Calculate margin of error
-    margin_of_error = critical_value * standard_error
+#     # Calculate margin of error
+#     margin_of_error = critical_value * standard_error
     
-    # Calculate confidence interval
-    confidence_interval = (weighted_mean - margin_of_error, weighted_mean + margin_of_error)
+#     # Calculate confidence interval
+#     confidence_interval = (weighted_mean - margin_of_error, weighted_mean + margin_of_error)
     
-    return {
-        'weighted_mean': weighted_mean,
-        'weighted_std': weighted_std,
-        'standard_error': standard_error,
-        'margin_of_error': margin_of_error,
-        'confidence_interval_lower': confidence_interval[0],
-        'confidence_interval_upper': confidence_interval[1]
-    }
+#     return {
+#         'weighted_mean': weighted_mean,
+#         'weighted_std': weighted_std,
+#         'standard_error': standard_error,
+#         'margin_of_error': margin_of_error,
+#         'confidence_interval_lower': confidence_interval[0],
+#         'confidence_interval_upper': confidence_interval[1]
+#     }
 
 def calculate_statistics(df, column, confidence=0.95):
     # Calculate weighted mean
@@ -276,6 +276,7 @@ def vmd0001_eq2b(
 def vmd0001_eq5(
     df: pd.DataFrame,
     carbon_stock_col: str = "aboveground_carbon_tonnes",
+    root_shoot_ratio: float = 0.36
 ) -> pd.DataFrame:
     """
     Calculate the belowground carbon stock based on the aboveground carbon stock and eco zone.
@@ -283,8 +284,9 @@ def vmd0001_eq5(
     Parameters:
     - df (pd.DataFrame): The input DataFrame containing the aboveground carbon stock.
     - carbon_stock_col (str, optional): The column name of the aboveground carbon stock data. Default value is "aboveground_carbon_tonnes".
-    - eco_zone (str, optional): The ecological zone. Default value is "tropical_rainforest".
-
+    - root_shoot_ration (float, optional): Ratio of below-ground biomass to above-ground biomass; applies to above-ground biomass, above-ground
+biomass growth, biomass removals and may differ for these components. Uses 0.36 as default for tropical rainforests
+    
     Returns:
     - DataFrame: The input data with an additional column for belowground carbon stock.
     
@@ -293,7 +295,7 @@ def vmd0001_eq5(
     """
     df = df.copy()
 
-    df["belowground_carbon_tonnes"] = df[carbon_stock_col] * 0.36
+    df["belowground_carbon_tonnes"] = df[carbon_stock_col] * root_shoot_ratio
 
     return df
 
