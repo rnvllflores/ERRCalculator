@@ -56,10 +56,10 @@ def allometric_tropical_tree(df, wooddensity_col, dbh_col, height_col):
 
     Formula:
     The aboveground biomass is calculated using the following equation:
-    aboveground_biomass = (0.0673 * ((wood density * height * dbh** 2) ** 0.976)). The factor 10 is used to convert the biomass from kg to metric tons.
+    aboveground_biomass = (0.0673 * ((wood density * height * dbh** 2) ** 0.976)).
 
     Returns:
-    pandas.DataFrame: The input dataframe with an additional column 'aboveground_biomass' representing the calculated aboveground biomass in tons.
+    pandas.DataFrame: The input dataframe with an additional column 'aboveground_biomass' representing the calculated aboveground biomass in kg.
     """
 
     df = df.copy()
