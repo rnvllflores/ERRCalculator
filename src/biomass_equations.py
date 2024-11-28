@@ -87,11 +87,11 @@ def allometric_peatland_tree(df, dbh_col):
 
     Returns:
     - df: DataFrame
-        The input DataFrame with an additional column 'aboveground_biomass' representing the calculated aboveground biomass.
+        The input DataFrame with an additional column 'aboveground_biomass' representing the calculated aboveground biomass in kg.
 
     Formula:
     The aboveground biomass is calculated using the following equation:
-    aboveground_biomass = (21.297 - (67.953 * trees[dbh_col]) + (0.74 * trees[dbh_col]**2)) The factor 10 is used to convert the biomass from kg to metric tons.
+    aboveground_biomass = (21.297 - (67.953 * trees[dbh_col]) + (0.74 * trees[dbh_col]**2))
 
     """
     df = df.copy()
